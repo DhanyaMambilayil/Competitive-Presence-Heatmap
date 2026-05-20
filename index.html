@@ -114,6 +114,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
       <label><input type="checkbox" id="cb-kiosk" checked onchange="render()">Kiosks</label>
     </div>
     <label class="tog"><input type="checkbox" id="cb-heat" onchange="render()">Heatmap</label>
+    <label class="tog"><input type="checkbox" id="cb-comp" onchange="render()">Competitive</label>
     <div id="bg-toggle">
       <button class="bgt-btn active" id="btn-map" onclick="setBg('map')">🗺 Map View</button>
       <button class="bgt-btn" id="btn-gov" onclick="setBg('gov')">🏛 Governorate View</button>
@@ -162,8 +163,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
     <div class="lr"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#16a34a;vertical-align:middle;margin-right:2px"></span> Al Mulla</div>
     <div class="lr"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1e3a8a;vertical-align:middle;margin-right:2px"></span> Al Ansari</div>
     <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
+    <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
       <div class="lr">📍 Pin = Branch</div>
       <div class="lr">⬛ Square = Kiosk</div>
+    </div>
+    <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;font-size:10px;color:#6b7280;">
+      <div style="margin-bottom:3px;font-weight:600;color:#9ca3af;">Competitive view</div>
+      <div class="lr"><span style="width:12px;height:12px;background:rgba(34,197,94,.6);display:inline-block;border-radius:2px;flex-shrink:0"></span> We're stronger</div>
+      <div class="lr"><span style="width:12px;height:12px;background:rgba(251,146,60,.6);display:inline-block;border-radius:2px;flex-shrink:0"></span> Competitors stronger</div>
+      <div class="lr"><span style="width:12px;height:12px;background:rgba(239,68,68,.6);display:inline-block;border-radius:2px;flex-shrink:0"></span> Not present</div>
+    </div>
     </div>
   </div>
 
@@ -176,72 +185,117 @@ const COLORS={bec:'#3b9edd',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#1e3a8a'};
 const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
 const CO_MAP={'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':'ansari'};
 
-// ── GOV BOUNDARIES — traced from reference maps ───────────────
+// ── GOV BOUNDARIES — sharp, traced from reference image ───────
 const GOV_DATA=[
   {name:'Al Asimah',key:'asima',
-   fill:'#f0d878',stroke:'#b89020',
-   label:[29.390,47.958],
-   // Small peninsula — Kuwait City, top of coastline
+   fill:'#a8d8e8',stroke:'#4a9ab5',
+   label:[29.392,47.970],
    poly:[
-     [29.420,47.938],[29.438,47.958],[29.445,47.992],[29.438,48.022],
-     [29.418,48.040],[29.392,48.048],[29.370,48.038],[29.355,48.015],
-     [29.348,47.988],[29.352,47.958],[29.365,47.930],[29.385,47.918],
-     [29.408,47.920]
+     [29.420,47.940],[29.438,47.962],[29.445,47.995],
+     [29.435,48.025],[29.415,48.042],[29.390,48.048],
+     [29.368,48.035],[29.352,48.010],[29.348,47.982],
+     [29.358,47.952],[29.378,47.932],[29.402,47.928]
    ]},
   {name:'Hawalli',key:'hawally',
-   fill:'#f0a0b8',stroke:'#c0507a',
-   label:[29.318,48.092],
-   // Thin coastal strip south/east of Asimah
+   fill:'#c8e8f0',stroke:'#5ab0c8',
+   label:[29.330,48.105],
+   // Pink — RIGHT of Asimah, thin coastal shape
    poly:[
-     [29.370,48.038],[29.392,48.048],[29.418,48.040],[29.410,48.075],
-     [29.398,48.118],[29.372,48.155],[29.345,48.158],[29.315,48.142],
-     [29.290,48.112],[29.278,48.080],[29.285,48.048],[29.318,48.035],
-     [29.348,48.020],[29.355,48.015],[29.370,48.038]
+     [29.390,48.048],[29.415,48.042],[29.412,48.078],
+     [29.400,48.122],[29.375,48.158],[29.348,48.160],
+     [29.318,48.145],[29.292,48.115],[29.278,48.080],
+     [29.285,48.050],[29.318,48.038],[29.348,48.020],
+     [29.368,48.035]
    ]},
   {name:'Mubarak Al Kabeer',key:'mubarak',
-   fill:'#b8a8d8',stroke:'#5030a0',
-   label:[29.238,48.055],
-   // Small square below Hawalli, above Ahmadi
+   fill:'#7ab8d0',stroke:'#2a7898',
+   label:[29.242,48.058],
+   // Purple rectangle below Asimah+Hawalli
    poly:[
-     [29.285,48.048],[29.278,48.080],[29.290,48.112],[29.315,48.142],
-     [29.292,48.158],[29.260,48.158],[29.228,48.138],[29.198,48.108],
-     [29.178,48.068],[29.195,48.030],[29.222,48.012],[29.258,48.015],
-     [29.285,48.048]
+     [29.285,48.050],[29.278,48.080],[29.292,48.115],
+     [29.318,48.145],[29.295,48.160],[29.262,48.160],
+     [29.228,48.140],[29.198,48.110],[29.178,48.070],
+     [29.195,48.032],[29.222,48.015],[29.258,48.018]
    ]},
   {name:'Al Farwaniyah',key:'farwaniya',
-   fill:'#a8c0e8',stroke:'#2850b0',
-   label:[29.278,47.948],
-   // Central inland square — between Jahra and coastal govs
+   fill:'#90c8d8',stroke:'#3888a8',
+   label:[29.282,47.950],
+   // Blue — inland square between Jahra and coastal govs
    poly:[
-     [29.352,47.958],[29.365,47.930],[29.385,47.918],[29.408,47.920],
-     [29.420,47.938],[29.418,48.040],[29.392,48.048],[29.370,48.038],
-     [29.355,48.015],[29.348,48.020],[29.318,48.035],[29.285,48.048],
-     [29.258,48.015],[29.222,48.012],[29.195,48.030],[29.178,48.068],
-     [29.195,47.948],[29.222,47.932],[29.258,47.925],[29.295,47.930],
-     [29.325,47.938],[29.348,47.952]
+     [29.348,47.982],[29.358,47.952],[29.378,47.932],
+     [29.402,47.928],[29.420,47.940],[29.415,48.042],
+     [29.390,48.048],[29.368,48.035],[29.348,48.020],
+     [29.318,48.038],[29.285,48.050],[29.258,48.018],
+     [29.222,48.015],[29.195,48.032],[29.195,47.950],
+     [29.222,47.935],[29.258,47.928],[29.295,47.932],
+     [29.325,47.940]
    ]},
   {name:'Al Ahmadi',key:'ahmadi',
-   fill:'#f0b080',stroke:'#c05820',
-   label:[29.062,48.082],
-   // Large southern governorate
+   fill:'#b8e0e8',stroke:'#4898b0',
+   label:[29.068,48.085],
+   // Large orange — starts immediately below Mubarak, goes to Saudi border
    poly:[
-     [29.195,47.872],[29.195,47.948],[29.178,48.068],[29.198,48.108],
-     [29.228,48.138],[29.198,48.158],[29.148,48.200],[29.075,48.202],
-     [28.985,48.358],[28.950,48.418],[28.920,48.340],[28.912,48.188],
-     [28.928,47.978],[28.950,47.872]
+     [29.195,47.872],[29.195,47.950],[29.195,48.032],
+     [29.178,48.070],[29.198,48.110],[29.228,48.140],
+     [29.198,48.160],[29.148,48.202],[29.078,48.202],
+     [28.988,48.360],[28.952,48.420],[28.922,48.342],
+     [28.912,48.192],[28.928,47.980],[28.950,47.872]
    ]},
   {name:'Al Jahra',key:'jahra',
-   fill:'#98c898',stroke:'#2a7030',
-   label:[29.372,47.530],
-   // Huge L-shaped western/northern governorate — covers all of west Kuwait
+   fill:'#d8f0f4',stroke:'#6ab8cc',
+   label:[29.375,47.525],
+   // Large green — all of north/west Kuwait, flat bottom edge
    poly:[
-     [29.558,47.375],[29.590,47.420],[29.602,47.560],[29.602,47.720],
-     [29.578,47.878],[29.455,47.878],[29.420,47.878],[29.408,47.920],
-     [29.385,47.918],[29.365,47.930],[29.352,47.958],[29.348,47.952],
-     [29.325,47.938],[29.295,47.930],[29.258,47.925],[29.222,47.932],
-     [29.195,47.948],[29.195,47.872],[28.950,47.872],[28.950,47.375]
+     [29.558,47.375],[29.592,47.425],[29.602,47.580],
+     [29.600,47.730],[29.578,47.880],[29.455,47.878],
+     [29.420,47.878],[29.402,47.928],[29.378,47.932],
+     [29.358,47.952],[29.348,47.982],[29.325,47.940],
+     [29.295,47.932],[29.258,47.928],[29.222,47.935],
+     [29.195,47.950],[29.195,47.872],[28.950,47.872],
+     [28.950,47.375]
    ]}
 ];
+
+// ── COMPETITIVE HEATMAP LOGIC ─────────────────────────────────
+// "We" = BEC + Al Ansari  |  "Competitors" = Al Muzaini + Al Mulla
+// Green  = we present AND stronger than competitors
+// Orange = we present BUT competitors stronger
+// Red    = we NOT present, competitors present
+function drawCompetitiveHeat(ctx,W,H,zoom){
+  const baseR=Math.max(22,Math.min(100,zoom*10-40));
+  const grid=40; // grid cell size in px
+  const cols=Math.ceil(W/grid)+1, rows=Math.ceil(H/grid)+1;
+
+  for(let row=0;row<rows;row++){
+    for(let col=0;col<cols;col++){
+      const px=col*grid, py=row*grid;
+      // convert pixel to latlng
+      const ll=map.containerPointToLatLng([px,py]);
+      const lat=ll.lat, lng=ll.lng;
+
+      let weCount=0, compCount=0;
+      for(const b of ALL_DATA){
+        const dx=b.lng-lng, dy=b.lat-lat;
+        const dist=Math.sqrt(dx*dx+dy*dy)*111; // approx km
+        const influence=Math.max(0,1-dist/(baseR*0.009));
+        if(influence<=0)continue;
+        if(b.co==='bec'||b.co==='ansari') weCount+=influence;
+        else compCount+=influence;
+      }
+
+      if(weCount===0&&compCount===0)continue;
+
+      let color;
+      if(weCount>0&&weCount>=compCount) color='rgba(34,197,94,'; // green
+      else if(weCount>0&&weCount<compCount) color='rgba(251,146,60,'; // orange
+      else color='rgba(239,68,68,'; // red — competitors only
+
+      const alpha=Math.min(0.55,Math.max(0.08,(weCount+compCount)*0.12));
+      ctx.fillStyle=color+alpha+')';
+      ctx.fillRect(px-grid/2,py-grid/2,grid,grid);
+    }
+  }
+}
 
 // ── MAP ───────────────────────────────────────────────────────
 const map=L.map('map',{center:[29.15,47.98],zoom:9,zoomControl:false});
@@ -291,21 +345,10 @@ function setBg(mode){
 
 function llToXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return[p.x,p.y];}
 
-function drawSmoothPoly(ctx,pts){
+function drawSharpPoly(ctx,pts){
   if(pts.length<3)return;
   ctx.moveTo(pts[0][0],pts[0][1]);
-  for(let i=0;i<pts.length;i++){
-    const p0=pts[(i-1+pts.length)%pts.length];
-    const p1=pts[i];
-    const p2=pts[(i+1)%pts.length];
-    const p3=pts[(i+2)%pts.length];
-    const t=0.35;
-    const cp1x=p1[0]+(p2[0]-p0[0])*t/2;
-    const cp1y=p1[1]+(p2[1]-p0[1])*t/2;
-    const cp2x=p2[0]-(p3[0]-p1[0])*t/2;
-    const cp2y=p2[1]-(p3[1]-p1[1])*t/2;
-    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2[0],p2[1]);
-  }
+  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
   ctx.closePath();
 }
 
@@ -355,7 +398,7 @@ function drawGov(){
   GOV_DATA.forEach(gov=>{
     const pts=gov.poly.map(([lat,lng])=>llToXY(lat,lng));
     govCtx.beginPath();
-    drawSmoothPoly(govCtx,pts);
+    drawSharpPoly(govCtx,pts);
     govCtx.fillStyle=gov.fill+'ee';
     govCtx.fill();
     govCtx.strokeStyle=gov.stroke+'99';
@@ -572,7 +615,12 @@ function render(){
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const showHeat=document.getElementById('cb-heat').checked;
 
-  // Heatmap blobs
+  // Competitive heatmap
+  if(document.getElementById('cb-comp').checked && ALL_DATA.length){
+    drawCompetitiveHeat(heatCtx,W,H,zoom);
+  }
+
+  // Standard heatmap blobs
   if(showHeat){
     const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
     for(const b of branches)if(groups[b.co])groups[b.co].push(b);
