@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Kuwait Exchange Network — Heatmap</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf0;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── HEADER ── */
+#header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#0f1117;border-bottom:1px solid #1e2130;flex-shrink:0;flex-wrap:wrap;gap:6px;z-index:1001;}
+#header h1{font-size:13px;font-weight:600;letter-spacing:.4px;color:#e8eaf0;white-space:nowrap;}
+#header h1 span{color:#4b5563;font-weight:400;margin-left:6px;font-size:11px;}
+
+#controls{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.btn-group{display:flex;gap:3px;align-items:center;background:#1a1d2e;border:1px solid #2a2d3e;border-radius:7px;padding:3px 7px;}
+.btn-group label{display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;white-space:nowrap;color:#9ca3af;}
+.btn-group label:hover{color:#e8eaf0;}
+.chip{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;color:#fff;letter-spacing:.3px;}
+.chip.bec{background:#2563eb;}.chip.muzaini{background:#dc2626;}.chip.mulla{background:#16a34a;}.chip.ansari{background:#d97706;}
+.ctl-cnt{font-size:10px;color:#6b7280;margin-left:1px;}
+.tog{display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;color:#9ca3af;padding:3px 7px;background:#1a1d2e;border:1px solid #2a2d3e;border-radius:7px;}
+.tog:hover{color:#e8eaf0;}
+.tog input{cursor:pointer;}
+
+/* ── MAP ── */
+#map-wrap{flex:1;position:relative;overflow:hidden;}
+#map{width:100%;height:100%;}
+#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;}
+
+/* ── HOVER TOOLTIP ── */
+#htip{
+  position:absolute;z-index:2000;pointer-events:none;display:none;
+  background:rgba(8,10,18,.97);border:1px solid #2a2d3e;border-radius:10px;
+  padding:11px 15px;width:220px;
+  box-shadow:0 10px 40px rgba(0,0,0,.8);backdrop-filter:blur(10px);
+}
+#htip .ht-bar{height:3px;border-radius:2px;margin-bottom:9px;}
+#htip .ht-co{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:3px;}
+#htip .ht-name{font-size:13px;font-weight:600;color:#f1f5f9;line-height:1.3;margin-bottom:7px;}
+#htip .ht-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
+#htip .tag{font-size:10px;padding:2px 7px;border-radius:4px;background:#1e2130;color:#9ca3af;}
+#htip .tag.type-branch{background:#1e3a5f;color:#93c5fd;}
+#htip .tag.type-kiosk{background:#3b1e1e;color:#fca5a5;}
+#htip .ht-addr{font-size:11px;color:#6b7280;line-height:1.4;margin-bottom:5px;}
+#htip .ht-meta{display:flex;gap:10px;font-size:10px;color:#4b5563;border-top:1px solid #1e2130;padding-top:6px;margin-top:4px;}
+#htip .ht-coords{font-size:9px;color:#374151;font-family:monospace;margin-top:3px;}
+
+/* ── SUMMARY BOX ── */
+#sumbox{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);min-width:140px;}
+#sumbox .st{font-weight:600;color:#e8eaf0;font-size:13px;margin-bottom:6px;}
+.sr{display:flex;justify-content:space-between;gap:10px;margin-bottom:2px;}
+.sl{color:#9ca3af;}.sv{color:#e8eaf0;font-weight:500;}
+
+/* ── LEGEND ── */
+#legend{position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);}
+#legend .lt{font-weight:600;color:#e8eaf0;margin-bottom:6px;font-size:12px;}
+.lr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.ls{width:9px;height:9px;border-radius:50%;}
+.ld{width:8px;height:8px;transform:rotate(45deg);}
+.grad-bar{width:80px;height:6px;border-radius:3px;background:linear-gradient(to right,rgba(0,80,255,0),rgba(0,200,100,.5),rgba(255,200,0,.75),rgba(255,80,0,.9),rgba(200,0,0,1));}
+
+/* ── LEAFLET POPUP ── */
+.leaflet-popup-content-wrapper{background:rgba(8,10,18,.97)!important;border:1px solid #2a2d3e!important;border-radius:10px!important;color:#e8eaf0!important;box-shadow:0 8px 32px rgba(0,0,0,.7)!important;}
+.leaflet-popup-content{margin:12px 15px!important;font-size:12px!important;line-height:1.6!important;}
+.leaflet-popup-tip{background:rgba(8,10,18,.97)!important;}
+.leaflet-popup-close-button{color:#9ca3af!important;font-size:16px!important;}
+
+/* ── LOADING ── */
+#loading{position:absolute;inset:0;background:rgba(8,10,18,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;gap:14px;}
+#loading p{color:#9ca3af;font-size:13px;}
+.spinner{width:32px;height:32px;border:3px solid #1e2130;border-top:3px solid #2563eb;border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── AREA LABELS ── */
+.area-label{background:transparent!important;border:none!important;box-shadow:none!important;}
+.area-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Kuwait Exchange Network <span>● branch &nbsp;◆ kiosk</span></h1>
+  <div id="controls">
+    <div class="btn-group">
+      <label><input type="checkbox" id="cb-bec" checked onchange="render()"><span class="chip bec">BEC</span><span class="ctl-cnt" id="cnt-bec"></span></label>
+      <label><input type="checkbox" id="cb-muzaini" checked onchange="render()"><span class="chip muzaini">Muzaini</span><span class="ctl-cnt" id="cnt-muzaini"></span></label>
+      <label><input type="checkbox" id="cb-mulla" checked onchange="render()"><span class="chip mulla">Al Mulla</span><span class="ctl-cnt" id="cnt-mulla"></span></label>
+      <label><input type="checkbox" id="cb-ansari" checked onchange="render()"><span class="chip ansari">Al Ansari</span><span class="ctl-cnt" id="cnt-ansari"></span></label>
+    </div>
+    <div class="btn-group">
+      <label><input type="checkbox" id="cb-branch" checked onchange="render()">Branches</label>
+      <label><input type="checkbox" id="cb-kiosk" checked onchange="render()">Kiosks</label>
+    </div>
+    <label class="tog"><input type="checkbox" id="cb-grid" checked onchange="toggleGrid()">Grid</label>
+    <label class="tog"><input type="checkbox" id="cb-areas" checked onchange="toggleAreas()">Areas</label>
+    <label class="tog"><input type="checkbox" id="cb-combined" onchange="render()">Combined heat</label>
+  </div>
+</div>
+
+<div id="map-wrap">
+  <div id="map"></div>
+  <canvas id="heat-canvas"></canvas>
+
+  <!-- Hover tooltip -->
+  <div id="htip">
+    <div class="ht-bar" id="ht-bar"></div>
+    <div class="ht-co" id="ht-co"></div>
+    <div class="ht-name" id="ht-name"></div>
+    <div class="ht-tags" id="ht-tags"></div>
+    <div class="ht-addr" id="ht-addr"></div>
+    <div class="ht-meta" id="ht-meta"></div>
+    <div class="ht-coords" id="ht-coords"></div>
+  </div>
+
+  <!-- Summary -->
+  <div id="sumbox">
+    <div class="st">📍 <span id="s-total">0</span> locations</div>
+    <div id="s-rows"></div>
+  </div>
+
+  <!-- Legend -->
+  <div id="legend">
+    <div class="lt">Branch density</div>
+    <div class="lr"><div class="grad-bar"></div><span style="font-size:10px">low → high</span></div>
+    <div style="margin-top:7px;border-top:1px solid #2a2d3e;padding-top:7px;">
+      <div class="lr"><div class="ls" style="background:#2563eb"></div>BEC</div>
+      <div class="lr"><div class="ls" style="background:#dc2626"></div>Al Muzaini</div>
+      <div class="lr"><div class="ls" style="background:#16a34a"></div>Al Mulla</div>
+      <div class="lr"><div class="ls" style="background:#d97706"></div>Al Ansari</div>
+      <div style="margin-top:5px;border-top:1px solid #2a2d3e;padding-top:5px;">
+        <div class="lr"><div class="ls" style="background:#6b7280"></div>Branch ●</div>
+        <div class="lr"><div class="ld" style="background:#6b7280"></div>Kiosk ◆</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loading"><div class="spinner"></div><p>Loading branch data…</p></div>
+</div>
+
+<script>
+const COLORS={bec:'#2563eb',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#d97706'};
+const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
+
+const AREAS=[
+  ["KUWAIT CITY",29.3697,47.9783],["MIRQAB",29.368,47.973],["MUBARAKIYA",29.376,47.968],
+  ["SALMIYA",29.331,48.060],["HAWALLY",29.339,48.020],["FARWANIYA",29.280,47.960],
+  ["KHAITAN",29.293,47.976],["JLEEB AL SHUYOUKH",29.260,47.929],["ABBASIYA",29.256,47.928],
+  ["SHUWAIKH",29.330,47.948],["RIGGAE",29.306,47.920],["JAHRA",29.340,47.700],
+  ["FAHAHEEL",29.082,48.131],["MAHBOULA",29.150,48.118],["MANGAF",29.102,48.128],
+  ["AHMADI",29.150,48.080],["FINTAS",29.175,48.113],["EGAILA",29.089,48.095],
+  ["SABAH AL SALEM",29.269,48.034],["AL QURAIN",29.274,48.046],["SALWA",29.302,48.082],
+  ["JABRIYA",29.316,48.051],["RUMAITHIYA",29.309,48.090],["MISHREF",29.299,48.072],
+  ["SABHAN",29.250,47.980],["SULAIBIYA",29.290,47.840],["DOHA",29.350,47.970],
+  ["YARMOUK",29.342,47.975],["KAIFAN",29.346,47.968],["BNEID AL GAR",29.366,47.988],
+  ["SHARQ",29.372,47.983],["DAIYA",29.355,47.985],["RAWDA",29.349,47.992]
+];
+
+// ── MAP INIT ──────────────────────────────────────────────────
+const map = L.map('map',{center:[29.28,47.98],zoom:10,zoomControl:true});
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19
+}).addTo(map);
+
+// ── CANVAS ────────────────────────────────────────────────────
+const canvas = document.getElementById('heat-canvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){
+  const w=document.getElementById('map-wrap');
+  canvas.width=w.clientWidth; canvas.height=w.clientHeight;
+}
+resizeCanvas();
+window.addEventListener('resize',()=>{resizeCanvas();render();});
+map.on('move zoom',render);
+
+// ── GRID ─────────────────────────────────────────────────────
+let gridLayer=null;
+function buildGrid(){
+  const lines=[];
+  for(let lat=28.9;lat<=29.6;lat+=0.05)
+    lines.push(L.polyline([[lat,47.4],[lat,48.6]],{color:'rgba(90,110,170,.15)',weight:1,dashArray:'3,7'}));
+  for(let lng=47.5;lng<=48.5;lng+=0.05)
+    lines.push(L.polyline([[28.8,lng],[29.7,lng]],{color:'rgba(90,110,170,.15)',weight:1,dashArray:'3,7'}));
+  gridLayer=L.layerGroup(lines).addTo(map);
+}
+buildGrid();
+function toggleGrid(){
+  if(document.getElementById('cb-grid').checked){if(!gridLayer)buildGrid();else gridLayer.addTo(map);}
+  else if(gridLayer)map.removeLayer(gridLayer);
+}
+
+// ── AREA LABELS ───────────────────────────────────────────────
+let areaMarkers=[];
+function buildAreas(){
+  areaMarkers.forEach(m=>map.removeLayer(m)); areaMarkers=[];
+  AREAS.forEach(([name,lat,lng])=>{
+    const icon=L.divIcon({className:'area-label',html:`<div class="area-lbl">${name}</div>`,iconAnchor:[0,0]});
+    areaMarkers.push(L.marker([lat,lng],{icon,interactive:false,zIndexOffset:-100}).addTo(map));
+  });
+}
+buildAreas();
+function toggleAreas(){
+  if(document.getElementById('cb-areas').checked)buildAreas();
+  else{areaMarkers.forEach(m=>map.removeLayer(m));areaMarkers=[];}
+}
+
+// ── DATA LOADING ──────────────────────────────────────────────
+let ALL_DATA=[];
+async function loadData(){
+  try{
+    const r=await fetch('branches.json');
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    ALL_DATA=await r.json();
+    document.getElementById('loading').style.display='none';
+    render();
+  }catch(e){
+    document.getElementById('loading').innerHTML=
+      `<div style="color:#ef4444;font-size:13px;text-align:center;">
+        ❌ Could not load branches.json<br>
+        <span style="font-size:11px;color:#6b7280;margin-top:6px;display:block;">
+          Run: <code style="background:#1e2130;padding:2px 6px;border-radius:4px;">python convert.py</code><br>
+          then serve locally or push to GitHub.
+        </span>
+       </div>`;
+  }
+}
+
+// ── FILTER ────────────────────────────────────────────────────
+function getActive(){
+  const bec=document.getElementById('cb-bec').checked;
+  const muz=document.getElementById('cb-muzaini').checked;
+  const mul=document.getElementById('cb-mulla').checked;
+  const ans=document.getElementById('cb-ansari').checked;
+  const br =document.getElementById('cb-branch').checked;
+  const ki =document.getElementById('cb-kiosk').checked;
+  return ALL_DATA.filter(b=>{
+    const coOk=(b.co==='bec'&&bec)||(b.co==='muzaini'&&muz)||(b.co==='mulla'&&mul)||(b.co==='ansari'&&ans);
+    const tyOk=(b.type==='branch'&&br)||(b.type==='kiosk'&&ki);
+    return coOk&&tyOk;
+  });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function toXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return{x:p.x,y:p.y};}
+function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const branches=getActive();
+  const zoom=map.getZoom();
+  const baseR=Math.max(18,Math.min(90,zoom*9-42));
+  const combined=document.getElementById('cb-combined').checked;
+
+  if(combined){
+    const img=ctx.createImageData(W,H);const d=img.data;
+    const pts=branches.map(b=>toXY(b.lat,b.lng));
+    for(let py=0;py<H;py++)for(let px=0;px<W;px++){
+      let v=0;for(const p of pts){const dx=px-p.x,dy=py-p.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<baseR)v+=Math.pow(1-dist/baseR,2);}
+      const n=Math.min(v/3.5,1);
+      if(n>0.008){let rv,gv,bv,av;
+        if(n<.3){const t=n/.3;rv=0;gv=Math.round(t*200);bv=Math.round(200*(1-t));av=Math.round(n*3.3*140);}
+        else if(n<.65){const t=(n-.3)/.35;rv=Math.round(t*255);gv=200;bv=0;av=Math.round(140+t*65);}
+        else{const t=(n-.65)/.35;rv=255;gv=Math.round(200*(1-t));bv=0;av=Math.round(200+t*55);}
+        const i=(py*W+px)*4;d[i]=rv;d[i+1]=gv;d[i+2]=bv;d[i+3]=av;}
+    }
+    ctx.putImageData(img,0,0);
+  } else {
+    const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
+    for(const b of branches)if(groups[b.co])groups[b.co].push(b);
+    for(const[co,pts]of Object.entries(groups)){
+      if(!pts.length)continue;
+      const[R,G,B]=hex2rgb(COLORS[co]);
+      for(const b of pts){
+        const{x,y}=toXY(b.lat,b.lng);
+        const r=b.type==='kiosk'?baseR*.65:baseR;
+        const g=ctx.createRadialGradient(x,y,0,x,y,r);
+        const a=b.type==='kiosk'?.22:.30;
+        g.addColorStop(0,`rgba(${R},${G},${B},${a})`);
+        g.addColorStop(.45,`rgba(${R},${G},${B},${a*.4})`);
+        g.addColorStop(1,`rgba(${R},${G},${B},0)`);
+        ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+      }
+    }
+  }
+
+  // Draw dots
+  const dotR=zoom>11?4.5:zoom>9?3.5:2.5;
+  for(const b of branches){
+    const{x,y}=toXY(b.lat,b.lng);
+    const col=COLORS[b.co];
+    if(b.type==='kiosk'){
+      ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);
+      ctx.fillStyle=col;ctx.fillRect(-dotR*.8,-dotR*.8,dotR*1.6,dotR*1.6);
+      ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.strokeRect(-dotR*.8,-dotR*.8,dotR*1.6,dotR*1.6);
+      ctx.restore();
+    } else {
+      ctx.beginPath();ctx.arc(x,y,dotR,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();
+    }
+  }
+
+  // Summary
+  const c={bec:{br:0,ki:0},muzaini:{br:0,ki:0},mulla:{br:0,ki:0},ansari:{br:0,ki:0}};
+  for(const b of branches)if(c[b.co])c[b.co][b.type==='kiosk'?'ki':'br']++;
+  document.getElementById('s-total').textContent=branches.length;
+  document.getElementById('s-rows').innerHTML=
+    Object.entries(c).filter(([,v])=>v.br+v.ki>0).map(([co,v])=>
+      `<div class="sr"><span class="sl"><span style="color:${COLORS[co]}">●</span> ${LABELS[co]}</span>`+
+      `<span class="sv">${v.br}${v.ki?`<span style="color:#6b7280;font-size:9px"> +${v.ki}k</span>`:''}</span></div>`
+    ).join('');
+  ['bec','muzaini','mulla','ansari'].forEach(co=>{
+    const v=c[co];document.getElementById('cnt-'+co).textContent=`${v.br+v.ki}`;
+  });
+}
+
+// ── HOVER TOOLTIP ────────────────────────────────────────────
+const tip=document.getElementById('htip');
+const wrap=document.getElementById('map-wrap');
+let hoveredB=null;
+
+function findNearest(mx,my){
+  const zoom=map.getZoom();
+  const r=zoom>11?14:zoom>9?11:9;
+  let best=null,minD=r;
+  for(const b of getActive()){
+    const{x,y}=toXY(b.lat,b.lng);
+    const d=Math.sqrt((mx-x)**2+(my-y)**2);
+    if(d<minD){minD=d;best=b;}
+  }
+  return best;
+}
+
+canvas.addEventListener('mousemove',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  const b=findNearest(mx,my);
+  if(b){
+    if(b!==hoveredB){
+      hoveredB=b;
+      const col=COLORS[b.co];
+      document.getElementById('ht-bar').style.background=col;
+      document.getElementById('ht-co').innerHTML=`<span style="color:${col}">${LABELS[b.co]}</span>`;
+      document.getElementById('ht-name').textContent=b.n;
+      document.getElementById('ht-tags').innerHTML=
+        `<span class="tag type-${b.type}">${b.type==='kiosk'?'◆ Kiosk':'● Branch'}</span>`+
+        (b.area?`<span class="tag">${b.area}</span>`:'')+
+        (b.gov?`<span class="tag">${b.gov} Gov.</span>`:'');
+      document.getElementById('ht-addr').textContent=b.address||'';
+      document.getElementById('ht-meta').innerHTML=
+        (b.phone?`<span>📞 ${b.phone}</span>`:'')+
+        (b.hours?`<span>🕐 ${b.hours}</span>`:'');
+      document.getElementById('ht-coords').textContent=`${b.lat.toFixed(5)}°N  ${b.lng.toFixed(5)}°E`;
+    }
+    // Smart position — flip sides near edges
+    const wRect=wrap.getBoundingClientRect();
+    const tx=e.clientX-wRect.left, ty=e.clientY-wRect.top;
+    const ttW=230,ttH=160;
+    const left=tx>(wRect.width/2)?tx-ttW-14:tx+14;
+    const top=ty>(wRect.height*0.6)?ty-ttH-10:ty+14;
+    tip.style.left=Math.max(4,Math.min(wRect.width-ttW-4,left))+'px';
+    tip.style.top=Math.max(4,Math.min(wRect.height-ttH-4,top))+'px';
+    tip.style.display='block';
+    canvas.style.cursor='pointer';
+  } else {
+    hoveredB=null;
+    tip.style.display='none';
+    canvas.style.cursor='default';
+  }
+});
+canvas.addEventListener('mouseleave',()=>{hoveredB=null;tip.style.display='none';canvas.style.cursor='default';});
+
+// ── CLICK — pinned popup ──────────────────────────────────────
+canvas.addEventListener('click',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  const b=findNearest(mx,my);
+  if(b){
+    const col=COLORS[b.co];
+    L.popup({maxWidth:260})
+      .setLatLng([b.lat,b.lng])
+      .setContent(`
+        <div style="border-left:3px solid ${col};padding-left:10px;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${col};margin-bottom:3px;">${LABELS[b.co]}</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:6px;">${b.n}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px;font-size:11px;">
+            <span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.type==='kiosk'?'◆ Kiosk':'● Branch'}</span>
+            ${b.area?`<span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.area}</span>`:''}
+            ${b.gov?`<span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.gov}</span>`:''}
+          </div>
+          ${b.address?`<div style="font-size:11px;color:#6b7280;margin-bottom:5px;">📍 ${b.address}</div>`:''}
+          <div style="display:flex;gap:12px;font-size:11px;color:#6b7280;">
+            ${b.phone?`<span>📞 ${b.phone}</span>`:''}
+            ${b.hours?`<span>🕐 ${b.hours}</span>`:''}
+          </div>
+          <div style="font-size:9px;color:#374151;margin-top:6px;font-family:monospace;">${b.lat.toFixed(5)}°N  ${b.lng.toFixed(5)}°E</div>
+        </div>
+      `)
+      .openOn(map);
+  } else {
+    map.closePopup();
+  }
+});
+
+// Allow Leaflet map drag through canvas when not near a dot
+canvas.addEventListener('mousedown',e=>{
+  const rect=canvas.getBoundingClientRect();
+  const b=findNearest(e.clientX-rect.left,e.clientY-rect.top);
+  if(!b){
+    const pane=document.querySelector('.leaflet-map-pane');
+    if(pane)pane.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY,button:e.button}));
+  }
+});
+
+// ── BOOT ─────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
