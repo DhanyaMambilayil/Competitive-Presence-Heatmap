@@ -124,7 +124,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
     <!-- Background toggle -->
     <div id="bg-toggle">
       <button class="bgt-btn active" id="btn-govmap" onclick="setBg('govmap')">🗺 Gov map</button>
-      <button class="bgt-btn" id="btn-streets" onclick="setBg('streets')">🏙 Streets</button>
+      <button class="bgt-btn" id="btn-streets" onclick="setBg('streets')">📍 Clean view</button>
     </div>
     <label class="tog"><input type="checkbox" id="cb-heat" checked onchange="render()">Heatmap</label>
     <label class="tog"><input type="checkbox" id="cb-grid" onchange="toggleGrid()">Grid</label>
@@ -306,26 +306,20 @@ function setBg(mode){
   document.getElementById('btn-streets').classList.toggle('active',mode==='streets');
 
   if(mode==='streets'){
-    // Streets — Voyager tiles + Leaflet colored polygons (canvas hidden)
+    // Clean mode — no map tiles at all, canvas draws everything like govmap
     map.removeLayer(lightTile);
-    voyagerTile.addTo(map);
-    govCanvas.style.display='none';
-    govCtx.clearRect(0,0,govCanvas.width,govCanvas.height);
-    // Show Leaflet polygons with semi-transparent gov colors
-    govLayers.forEach((l,i)=>{
-      const gov=GOV_DATA[i];
-      l.setStyle({
-        color:gov.color, weight:2.5, opacity:.9,
-        fillColor:gov.fillColor, fillOpacity:.18,
-        dashArray:'6,4'
-      });
-    });
-    // Add name labels
-    govNameMarkers.forEach(m=>m.addTo(map));
+    map.removeLayer(voyagerTile);
+    document.getElementById('map').style.background='#e8e4dc';
+    govCanvas.style.display='block';
+    // Leaflet polygons invisible — canvas handles visuals
+    govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
+    govNameMarkers.forEach(m=>map.removeLayer(m));
+    drawGovMap();
   } else {
-    // Gov map mode — canvas draws everything, Leaflet polygons invisible (click only)
+    // Gov map mode — light tile underneath + canvas on top
     map.removeLayer(voyagerTile);
     lightTile.addTo(map);
+    document.getElementById('map').style.background='';
     govCanvas.style.display='block';
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
     govNameMarkers.forEach(m=>map.removeLayer(m));
@@ -343,19 +337,40 @@ function latLngToPoint(lat,lng){
 function drawGovMap(){
   const W=govCanvas.width,H=govCanvas.height;
   govCtx.clearRect(0,0,W,H);
-  if(currentBg!=='govmap') return;   // streets mode — canvas stays blank
 
-  // Sea background
-  govCtx.fillStyle='#c8e6f5';
-  govCtx.fillRect(0,0,W,H);
+  if(currentBg==='govmap'){
+    // Gov map — sea background, tile underneath handles land
+    govCtx.fillStyle='#c8e6f5';
+    govCtx.fillRect(0,0,W,H);
+  } else {
+    // Clean mode — draw everything on canvas, no tiles
+    // Sand/land background
+    govCtx.fillStyle='#e8e2d0';
+    govCtx.fillRect(0,0,W,H);
+    // Persian Gulf — right side light blue
+    govCtx.fillStyle='#b8d9f0';
+    govCtx.beginPath();
+    const p1=latLngToPoint(29.60,48.50),p2=latLngToPoint(28.90,48.50);
+    const p3=latLngToPoint(28.90,48.10),p4=latLngToPoint(29.10,48.20);
+    const p5=latLngToPoint(29.30,48.20),p6=latLngToPoint(29.45,48.05);
+    const p7=latLngToPoint(29.55,47.95),p8=latLngToPoint(29.60,47.85);
+    govCtx.moveTo(p1[0],p1[1]);govCtx.lineTo(p2[0],p2[1]);
+    govCtx.lineTo(p3[0],p3[1]);govCtx.lineTo(p4[0],p4[1]);
+    govCtx.lineTo(p5[0],p5[1]);govCtx.lineTo(p6[0],p6[1]);
+    govCtx.lineTo(p7[0],p7[1]);govCtx.lineTo(p8[0],p8[1]);
+    govCtx.lineTo(p1[0],p1[1]);govCtx.closePath();govCtx.fill();
+    // Iraq area — slightly different sand
+    govCtx.fillStyle='#ddd6c0';
+    govCtx.fillRect(0,0,latLngToPoint(29.55,47.38)[0],H);
+  }
 
-  // Draw each governorate — solid fill
+  // Draw each governorate — same in both modes
   GOV_DATA.forEach(gov=>{
     const pts=gov.poly.map(([lat,lng])=>latLngToPoint(lat,lng));
     if(pts.length<3)return;
     govCtx.beginPath();
     drawSmoothPoly(govCtx,pts,true);
-    govCtx.fillStyle=gov.fillColor+'cc';
+    govCtx.fillStyle=gov.fillColor+(currentBg==='govmap'?'cc':'dd');
     govCtx.fill();
     govCtx.strokeStyle=gov.color;
     govCtx.lineWidth=2.5;
@@ -363,19 +378,16 @@ function drawGovMap(){
     govCtx.stroke();
   });
 
-  // Governorate name labels
+  // Governorate name labels — both modes
   GOV_DATA.forEach(gov=>{
     const[x,y]=latLngToPoint(gov.labelPos[0],gov.labelPos[1]);
     govCtx.save();
     govCtx.font='bold 13px "Segoe UI",sans-serif';
-    govCtx.textAlign='center';
-    govCtx.textBaseline='middle';
-    govCtx.shadowColor='rgba(255,255,255,.8)';
-    govCtx.shadowBlur=6;
+    govCtx.textAlign='center';govCtx.textBaseline='middle';
+    govCtx.shadowColor='rgba(255,255,255,.85)';govCtx.shadowBlur=6;
     govCtx.fillStyle=gov.color;
     govCtx.fillText(gov.name.toUpperCase(),x,y);
-    govCtx.shadowBlur=0;
-    govCtx.restore();
+    govCtx.shadowBlur=0;govCtx.restore();
   });
 }
 
