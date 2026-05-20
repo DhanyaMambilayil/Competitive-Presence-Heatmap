@@ -21,43 +21,80 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
 .ctl-cnt{font-size:10px;color:#6b7280;margin-left:1px;}
 .tog{display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;color:#9ca3af;padding:3px 7px;background:#1a1d2e;border:1px solid #2a2d3e;border-radius:7px;}
 .tog:hover{color:#e8eaf0;}
-#refresh-btn{display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;color:#e8eaf0;padding:4px 10px;background:#1e3a5f;border:1px solid #2563eb;border-radius:7px;white-space:nowrap;font-family:inherit;}
-#refresh-btn:hover{background:#1d4ed8;}
+.hdr-btn{display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;color:#e8eaf0;padding:4px 10px;background:#1e3a5f;border:1px solid #2563eb;border-radius:7px;white-space:nowrap;font-family:inherit;}
+.hdr-btn:hover{background:#1d4ed8;}
+
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{width:100%;height:100%;}
 #heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;}
-#htip{position:absolute;z-index:2000;pointer-events:none;display:none;background:rgba(8,10,18,.97);border:1px solid #2a2d3e;border-radius:10px;padding:11px 15px;width:220px;box-shadow:0 10px 40px rgba(0,0,0,.8);backdrop-filter:blur(10px);}
-#htip .ht-bar{height:3px;border-radius:2px;margin-bottom:9px;}
-#htip .ht-co{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:3px;}
-#htip .ht-name{font-size:13px;font-weight:600;color:#f1f5f9;line-height:1.3;margin-bottom:7px;}
-#htip .ht-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
-#htip .tag{font-size:10px;padding:2px 7px;border-radius:4px;background:#1e2130;color:#9ca3af;}
+
+/* Zoom buttons */
+#zoom-btns{position:absolute;bottom:80px;left:10px;z-index:1000;display:flex;flex-direction:column;gap:4px;}
+.zbtn{width:32px;height:32px;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:7px;color:#e8eaf0;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.zbtn:hover{background:#1a1d2e;border-color:#2563eb;}
+
+/* Hover tooltip */
+#htip{position:absolute;z-index:2000;pointer-events:none;display:none;background:rgba(8,10,18,.97);border:1px solid #2a2d3e;border-radius:10px;padding:12px 15px;width:210px;box-shadow:0 10px 40px rgba(0,0,0,.8);backdrop-filter:blur(10px);}
+#htip .ht-bar{height:3px;border-radius:2px;margin-bottom:10px;}
+#htip .ht-co{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:4px;}
+#htip .ht-name{font-size:13px;font-weight:600;color:#f1f5f9;line-height:1.3;margin-bottom:8px;}
+#htip .ht-tags{display:flex;gap:5px;flex-wrap:wrap;}
+#htip .tag{font-size:10px;padding:2px 8px;border-radius:4px;background:#1e2130;color:#9ca3af;}
 #htip .tag.type-branch{background:#1e3a5f;color:#93c5fd;}
 #htip .tag.type-kiosk{background:#3b1e1e;color:#fca5a5;}
-#htip .ht-addr{font-size:11px;color:#6b7280;line-height:1.4;margin-bottom:5px;}
-#htip .ht-meta{display:flex;gap:10px;font-size:10px;color:#4b5563;border-top:1px solid #1e2130;padding-top:6px;margin-top:4px;}
-#htip .ht-coords{font-size:9px;color:#374151;font-family:monospace;margin-top:3px;}
+#htip .tag.gov{background:#1a2e1a;color:#86efac;}
+
+/* Governorate stats popup */
+#gov-panel{position:absolute;z-index:2000;display:none;background:rgba(8,10,18,.97);border:1px solid #2a2d3e;border-radius:12px;padding:0;width:260px;box-shadow:0 12px 48px rgba(0,0,0,.85);backdrop-filter:blur(12px);overflow:hidden;}
+#gov-panel .gp-head{padding:12px 15px 10px;border-bottom:1px solid #1e2130;}
+#gov-panel .gp-title{font-size:14px;font-weight:600;color:#f1f5f9;margin-bottom:2px;}
+#gov-panel .gp-total{font-size:11px;color:#6b7280;}
+#gov-panel .gp-body{padding:10px 15px 14px;}
+#gov-panel .gp-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#6b7280;font-size:16px;cursor:pointer;line-height:1;}
+#gov-panel .gp-close:hover{color:#e8eaf0;}
+.gp-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #1e2130;}
+.gp-row:last-child{border-bottom:none;}
+.gp-co{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:#e8eaf0;}
+.gp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.gp-counts{display:flex;gap:6px;align-items:center;}
+.gp-badge{font-size:10px;padding:1px 7px;border-radius:4px;}
+.gp-br{background:#1e3a5f;color:#93c5fd;}
+.gp-ki{background:#3b1e1e;color:#fca5a5;}
+.gp-zero{color:#374151;font-size:11px;}
+.gp-bar-wrap{margin-top:10px;padding-top:8px;border-top:1px solid #1e2130;}
+.gp-bar-label{font-size:10px;color:#6b7280;margin-bottom:4px;}
+.gp-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.gp-bar-name{font-size:10px;color:#9ca3af;width:60px;flex-shrink:0;}
+.gp-bar-track{flex:1;height:5px;background:#1e2130;border-radius:3px;overflow:hidden;}
+.gp-bar-fill{height:100%;border-radius:3px;transition:width .3s;}
+.gp-bar-num{font-size:10px;color:#6b7280;width:20px;text-align:right;}
+
 #sumbox{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);min-width:150px;}
 #sumbox .st{font-weight:600;color:#e8eaf0;font-size:13px;margin-bottom:6px;}
 .sr{display:flex;justify-content:space-between;gap:10px;margin-bottom:2px;}
 .sl{color:#9ca3af;}.sv{color:#e8eaf0;font-weight:500;}
 #last-updated{font-size:9px;color:#4b5563;margin-top:6px;border-top:1px solid #1e2130;padding-top:5px;}
+
 #legend{position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);}
 #legend .lt{font-weight:600;color:#e8eaf0;margin-bottom:6px;font-size:12px;}
 .lr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
 .ls{width:9px;height:9px;border-radius:50%;}
 .ld{width:8px;height:8px;transform:rotate(45deg);}
 .grad-bar{width:80px;height:6px;border-radius:3px;background:linear-gradient(to right,rgba(0,80,255,0),rgba(0,200,100,.5),rgba(255,200,0,.75),rgba(255,80,0,.9),rgba(200,0,0,1));}
+
 .leaflet-popup-content-wrapper{background:rgba(8,10,18,.97)!important;border:1px solid #2a2d3e!important;border-radius:10px!important;color:#e8eaf0!important;box-shadow:0 8px 32px rgba(0,0,0,.7)!important;}
 .leaflet-popup-content{margin:12px 15px!important;font-size:12px!important;line-height:1.6!important;}
 .leaflet-popup-tip{background:rgba(8,10,18,.97)!important;}
 .leaflet-popup-close-button{color:#9ca3af!important;font-size:16px!important;}
+
 #loading{position:absolute;inset:0;background:rgba(8,10,18,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;gap:14px;}
 #loading p{color:#9ca3af;font-size:13px;}
 .spinner{width:32px;height:32px;border:3px solid #1e2130;border-top:3px solid #2563eb;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .area-label{background:transparent!important;border:none!important;box-shadow:none!important;}
 .area-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);}
+.gov-label{background:transparent!important;border:none!important;box-shadow:none!important;}
+.gov-lbl{font-size:12px;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);}
 </style>
 </head>
 <body>
@@ -77,28 +114,47 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
     </div>
     <label class="tog"><input type="checkbox" id="cb-grid" checked onchange="toggleGrid()">Grid</label>
     <label class="tog"><input type="checkbox" id="cb-areas" checked onchange="toggleAreas()">Areas</label>
+    <label class="tog"><input type="checkbox" id="cb-govs" checked onchange="toggleGovs()">Governorates</label>
     <label class="tog"><input type="checkbox" id="cb-combined" onchange="render()">Combined heat</label>
-    <button id="refresh-btn" onclick="loadData(true)">↻ Refresh</button>
+    <button class="hdr-btn" onclick="loadData(true)">↻ Refresh</button>
   </div>
 </div>
 
 <div id="map-wrap">
   <div id="map"></div>
   <canvas id="heat-canvas"></canvas>
+
+  <!-- Zoom buttons -->
+  <div id="zoom-btns">
+    <button class="zbtn" onclick="map.zoomIn()" title="Zoom in">+</button>
+    <button class="zbtn" onclick="map.zoomOut()" title="Zoom out">−</button>
+    <button class="zbtn" style="font-size:13px;" onclick="map.setView([29.28,47.98],10)" title="Reset view">⌂</button>
+  </div>
+
+  <!-- Hover tooltip — 4 fields only -->
   <div id="htip">
-    <div class="ht-bar" id="ht-bar"></div>
-    <div class="ht-co" id="ht-co"></div>
+    <div class="ht-bar"  id="ht-bar"></div>
+    <div class="ht-co"   id="ht-co"></div>
     <div class="ht-name" id="ht-name"></div>
     <div class="ht-tags" id="ht-tags"></div>
-    <div class="ht-addr" id="ht-addr"></div>
-    <div class="ht-meta" id="ht-meta"></div>
-    <div class="ht-coords" id="ht-coords"></div>
   </div>
+
+  <!-- Governorate stats panel -->
+  <div id="gov-panel">
+    <div class="gp-head">
+      <div class="gp-title" id="gp-title"></div>
+      <div class="gp-total" id="gp-total"></div>
+      <button class="gp-close" onclick="closeGovPanel()">✕</button>
+    </div>
+    <div class="gp-body" id="gp-body"></div>
+  </div>
+
   <div id="sumbox">
     <div class="st">📍 <span id="s-total">0</span> locations</div>
     <div id="s-rows"></div>
     <div id="last-updated"></div>
   </div>
+
   <div id="legend">
     <div class="lt">Branch density</div>
     <div class="lr"><div class="grad-bar"></div><span style="font-size:10px">low → high</span></div>
@@ -113,16 +169,41 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
       </div>
     </div>
   </div>
+
   <div id="loading"><div class="spinner"></div><p id="loading-msg">Loading from Google Sheet…</p></div>
 </div>
 
 <script>
-// ── GOOGLE SHEET CSV URL ──────────────────────────────────────
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0DcCB5P3DupJTwxRgcvCPX8RxirRRCV6I8y_oqJpQd-IvsVdVsY52o2csxhwDe8N29nP35gvLmz6-/pub?gid=0&single=true&output=csv';
+const SHEET_CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vR0DcCB5P3DupJTwxRgcvCPX8RxirRRCV6I8y_oqJpQd-IvsVdVsY52o2csxhwDe8N29nP35gvLmz6-/pub?gid=0&single=true&output=csv';
+const COLORS={bec:'#2563eb',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#d97706'};
+const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
+const CO_MAP={'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':'ansari'};
 
-const COLORS = {bec:'#2563eb',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#d97706'};
-const LABELS = {bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
-const CO_MAP = {'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':'ansari'};
+// ── GOVERNORATE BOUNDARIES (approximate polygons) ─────────────
+const GOV_DATA=[
+  {name:'Al Asima',key:'asima',color:'#6366f1',label:[29.385,47.990],poly:[
+    [29.450,47.850],[29.450,48.050],[29.320,48.050],[29.300,47.980],
+    [29.300,47.920],[29.350,47.870],[29.450,47.850]
+  ]},
+  {name:'Hawally',key:'hawally',color:'#ec4899',label:[29.310,48.040],poly:[
+    [29.320,48.050],[29.370,48.050],[29.370,48.110],[29.250,48.110],
+    [29.250,47.990],[29.300,47.980],[29.320,48.050]
+  ]},
+  {name:'Farwaniya',key:'farwaniya',color:'#f59e0b',label:[29.280,47.940],poly:[
+    [29.300,47.920],[29.300,47.980],[29.250,47.990],[29.210,47.990],
+    [29.210,47.870],[29.300,47.870],[29.300,47.920]
+  ]},
+  {name:'Ahmadi',key:'ahmadi',color:'#10b981',label:[29.100,48.050],poly:[
+    [29.210,47.870],[29.210,48.200],[28.950,48.400],[28.950,47.870],[29.210,47.870]
+  ]},
+  {name:'Al Jahra',key:'jahra',color:'#8b5cf6',label:[29.380,47.640],poly:[
+    [29.550,47.500],[29.550,47.870],[29.350,47.870],[29.210,47.870],
+    [29.210,47.500],[29.550,47.500]
+  ]},
+  {name:'Mubarak Al Kabeer',key:'mubarak',color:'#14b8a6',label:[29.240,48.070],poly:[
+    [29.250,47.990],[29.250,48.110],[29.150,48.110],[29.150,47.990],[29.250,47.990]
+  ]},
+];
 
 const AREAS=[
   ["KUWAIT CITY",29.3697,47.9783],["MIRQAB",29.368,47.973],["MUBARAKIYA",29.376,47.968],
@@ -139,18 +220,14 @@ const AREAS=[
 ];
 
 // ── MAP ───────────────────────────────────────────────────────
-const map = L.map('map',{center:[29.28,47.98],zoom:10,zoomControl:true});
+const map=L.map('map',{center:[29.28,47.98],zoom:10,zoomControl:false});
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
   attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19
 }).addTo(map);
 
-const canvas = document.getElementById('heat-canvas');
-const ctx    = canvas.getContext('2d');
-
-function resizeCanvas(){
-  const w=document.getElementById('map-wrap');
-  canvas.width=w.clientWidth; canvas.height=w.clientHeight;
-}
+const canvas=document.getElementById('heat-canvas');
+const ctx=canvas.getContext('2d');
+function resizeCanvas(){const w=document.getElementById('map-wrap');canvas.width=w.clientWidth;canvas.height=w.clientHeight;}
 resizeCanvas();
 window.addEventListener('resize',()=>{resizeCanvas();render();});
 map.on('move zoom',render);
@@ -159,127 +236,203 @@ map.on('move zoom',render);
 let gridLayer=null;
 function buildGrid(){
   const lines=[];
-  for(let lat=28.9;lat<=29.6;lat+=0.05)
-    lines.push(L.polyline([[lat,47.4],[lat,48.6]],{color:'rgba(90,110,170,.15)',weight:1,dashArray:'3,7'}));
-  for(let lng=47.5;lng<=48.5;lng+=0.05)
-    lines.push(L.polyline([[28.8,lng],[29.7,lng]],{color:'rgba(90,110,170,.15)',weight:1,dashArray:'3,7'}));
+  for(let lat=28.9;lat<=29.6;lat+=0.05)lines.push(L.polyline([[lat,47.4],[lat,48.6]],{color:'rgba(90,110,170,.15)',weight:1,dashArray:'3,7'}));
+  for(let lng=47.5;lng<=48.5;lng+=0.05)lines.push(L.polyline([[28.8,lng],[29.7,lng]],{color:'rgba(90,110,170,.15)',weight:1,dashArray:'3,7'}));
   gridLayer=L.layerGroup(lines).addTo(map);
 }
 buildGrid();
-function toggleGrid(){
-  if(document.getElementById('cb-grid').checked){if(!gridLayer)buildGrid();else gridLayer.addTo(map);}
-  else if(gridLayer)map.removeLayer(gridLayer);
-}
+function toggleGrid(){if(document.getElementById('cb-grid').checked){if(!gridLayer)buildGrid();else gridLayer.addTo(map);}else if(gridLayer)map.removeLayer(gridLayer);}
 
 // ── AREA LABELS ───────────────────────────────────────────────
 let areaMarkers=[];
 function buildAreas(){
-  areaMarkers.forEach(m=>map.removeLayer(m)); areaMarkers=[];
+  areaMarkers.forEach(m=>map.removeLayer(m));areaMarkers=[];
   AREAS.forEach(([name,lat,lng])=>{
     const icon=L.divIcon({className:'area-label',html:`<div class="area-lbl">${name}</div>`,iconAnchor:[0,0]});
     areaMarkers.push(L.marker([lat,lng],{icon,interactive:false,zIndexOffset:-100}).addTo(map));
   });
 }
 buildAreas();
-function toggleAreas(){
-  if(document.getElementById('cb-areas').checked)buildAreas();
-  else{areaMarkers.forEach(m=>map.removeLayer(m));areaMarkers=[];}
+function toggleAreas(){if(document.getElementById('cb-areas').checked)buildAreas();else{areaMarkers.forEach(m=>map.removeLayer(m));areaMarkers=[];}}
+
+// ── GOVERNORATE POLYGONS ──────────────────────────────────────
+let govLayers=[];
+let govLabelMarkers=[];
+
+function buildGovs(){
+  govLayers.forEach(l=>map.removeLayer(l));
+  govLabelMarkers.forEach(m=>map.removeLayer(m));
+  govLayers=[];govLabelMarkers=[];
+
+  GOV_DATA.forEach(gov=>{
+    const hex=gov.color;
+    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+
+    const poly=L.polygon(gov.poly,{
+      color:hex,weight:2,opacity:.7,
+      fillColor:`rgba(${r},${g},${b},.08)`,fillOpacity:1,
+      dashArray:'6,4',interactive:true
+    });
+
+    poly.on('click',function(e){
+      L.DomEvent.stopPropagation(e);
+      showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);
+    });
+    poly.on('mouseover',function(){this.setStyle({fillColor:`rgba(${r},${g},${b},.18)`,weight:2.5});});
+    poly.on('mouseout',function(){this.setStyle({fillColor:`rgba(${r},${g},${b},.08)`,weight:2});});
+
+    poly.addTo(map);
+    govLayers.push(poly);
+
+    // Governorate name label
+    const icon=L.divIcon({className:'gov-label',html:`<div class="gov-lbl" style="color:${hex}">${gov.name}</div>`,iconAnchor:[0,0]});
+    const m=L.marker(gov.label,{icon,interactive:false,zIndexOffset:-50}).addTo(map);
+    govLabelMarkers.push(m);
+  });
 }
+buildGovs();
+function toggleGovs(){
+  if(document.getElementById('cb-govs').checked)buildGovs();
+  else{govLayers.forEach(l=>map.removeLayer(l));govLabelMarkers.forEach(m=>map.removeLayer(m));govLayers=[];govLabelMarkers=[];}
+}
+
+// ── GOV PANEL ─────────────────────────────────────────────────
+function showGovPanel(gov,cx,cy){
+  const panel=document.getElementById('gov-panel');
+  const wrap=document.getElementById('map-wrap');
+  const wRect=wrap.getBoundingClientRect();
+
+  // Count branches per company in this governorate
+  const cos=['bec','muzaini','mulla','ansari'];
+  const stats={};
+  cos.forEach(co=>stats[co]={branch:0,kiosk:0});
+
+  ALL_DATA.forEach(b=>{
+    const govKey=(b.gov||'').toLowerCase();
+    const matches=govKey.includes(gov.key)||
+      (gov.key==='asima'&&(govKey.includes('asima')||govKey.includes('capital')||govKey.includes('kuwait city')))||
+      (gov.key==='mubarak'&&(govKey.includes('mubarak')||govKey.includes('kabeer')))||
+      (gov.key==='jahra'&&govKey.includes('jahra'))||
+      (gov.key==='ahmadi'&&govKey.includes('ahmadi'))||
+      (gov.key==='hawally'&&govKey.includes('hawally'))||
+      (gov.key==='farwaniya'&&govKey.includes('farwaniya'));
+    if(matches&&stats[b.co])stats[b.co][b.type]++;
+  });
+
+  const total=cos.reduce((s,co)=>s+stats[co].branch+stats[co].kiosk,0);
+  const maxTotal=Math.max(...cos.map(co=>stats[co].branch+stats[co].kiosk),1);
+
+  document.getElementById('gp-title').textContent=gov.name+' Governorate';
+  document.getElementById('gp-total').textContent=`${total} total locations`;
+
+  let html='';
+  cos.forEach(co=>{
+    const br=stats[co].branch,ki=stats[co].kiosk,tot=br+ki;
+    const pct=Math.round(tot/maxTotal*100);
+    html+=`
+      <div class="gp-row">
+        <div class="gp-co">
+          <div class="gp-dot" style="background:${COLORS[co]}"></div>
+          ${LABELS[co]}
+        </div>
+        <div class="gp-counts">
+          ${br>0?`<span class="gp-badge gp-br">● ${br} branch${br!==1?'es':''}</span>`:''}
+          ${ki>0?`<span class="gp-badge gp-ki">◆ ${ki} kiosk${ki!==1?'s':''}</span>`:''}
+          ${tot===0?`<span class="gp-zero">—</span>`:''}
+        </div>
+      </div>`;
+  });
+
+  // Add mini bar chart
+  html+=`<div class="gp-bar-wrap"><div class="gp-bar-label">Distribution</div>`;
+  cos.forEach(co=>{
+    const tot=stats[co].branch+stats[co].kiosk;
+    if(tot===0)return;
+    const pct=Math.round(tot/maxTotal*100);
+    html+=`<div class="gp-bar-row">
+      <div class="gp-bar-name">${LABELS[co]}</div>
+      <div class="gp-bar-track"><div class="gp-bar-fill" style="width:${pct}%;background:${COLORS[co]}"></div></div>
+      <div class="gp-bar-num">${tot}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+
+  document.getElementById('gp-body').innerHTML=html;
+
+  // Position panel — keep within viewport
+  const pw=270,ph=320;
+  const tx=cx-wRect.left,ty=cy-wRect.top;
+  let left=tx+14,top=ty+14;
+  if(left+pw>wRect.width-10)left=tx-pw-14;
+  if(top+ph>wRect.height-10)top=ty-ph-14;
+  left=Math.max(10,left);top=Math.max(10,top);
+
+  panel.style.left=left+'px';
+  panel.style.top=top+'px';
+  panel.style.display='block';
+}
+
+function closeGovPanel(){document.getElementById('gov-panel').style.display='none';}
+map.on('click',closeGovPanel);
 
 // ── CSV PARSER ────────────────────────────────────────────────
 function parseCSV(text){
-  const lines = text.trim().split('\n');
-  const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
-  const rows = [];
+  const lines=text.trim().split('\n');
+  const headers=lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+  const rows=[];
   for(let i=1;i<lines.length;i++){
-    // handle quoted fields with commas inside
-    const cols = [];
-    let cur='', inQ=false;
+    const cols=[];let cur='',inQ=false;
     for(let c=0;c<lines[i].length;c++){
-      if(lines[i][c]==='"'){ inQ=!inQ; }
-      else if(lines[i][c]===','&&!inQ){ cols.push(cur.trim()); cur=''; }
+      if(lines[i][c]==='"')inQ=!inQ;
+      else if(lines[i][c]===','&&!inQ){cols.push(cur.trim());cur='';}
       else cur+=lines[i][c];
     }
     cols.push(cur.trim());
-    if(cols.length<7) continue;
-    const obj={};
-    headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
+    if(cols.length<7)continue;
+    const obj={};headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
     rows.push(obj);
   }
   return rows;
 }
 
-// ── LOAD DATA FROM GOOGLE SHEET ───────────────────────────────
-let ALL_DATA = [];
-
+// ── LOAD DATA ─────────────────────────────────────────────────
+let ALL_DATA=[];
 async function loadData(manual=false){
   document.getElementById('loading').style.display='flex';
-  document.getElementById('loading-msg').textContent = manual ? 'Refreshing from Google Sheet…' : 'Loading from Google Sheet…';
-
-  try {
-    // Use a CORS proxy for GitHub Pages, direct fetch for local
-    const url = SHEET_CSV_URL + '&t=' + Date.now(); // bust cache
-    const resp = await fetch(url);
-    if(!resp.ok) throw new Error('HTTP ' + resp.status);
-    const text = await resp.text();
-    const rows = parseCSV(text);
-
-    ALL_DATA = [];
-    let skipped = 0;
-
-    rows.forEach(row => {
-      const active = (row['Active']||'').trim().toLowerCase();
-      if(active !== 'yes'){ skipped++; return; }
-
-      const company = (row['Company']||'').trim();
-      const name    = (row['Branch Name']||'').trim();
-      const area    = (row['Area']||'').trim();
-      const gov     = (row['Governorate']||'').trim();
-      const btype   = (row['Type']||'').trim().toLowerCase();
-      const lat     = parseFloat(row['Latitude']);
-      const lng     = parseFloat(row['Longitude']);
-      const address = (row['Address']||'').trim();
-      const phone   = (row['Phone']||'').trim();
-      const hours   = (row['Hours']||'').trim();
-
-      if(!CO_MAP[company]) return;
-      if(!name) return;
-      if(isNaN(lat)||isNaN(lng)) return;
-      if(lat<28||lat>31||lng<46||lng>50) return;
-
-      ALL_DATA.push({
-        n:name, co:CO_MAP[company], company, area, gov,
-        type: btype==='kiosk'?'kiosk':'branch',
-        lat, lng, address, phone, hours
-      });
+  document.getElementById('loading-msg').textContent=manual?'Refreshing from Google Sheet…':'Loading from Google Sheet…';
+  try{
+    const resp=await fetch(SHEET_CSV_URL+'&t='+Date.now());
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const text=await resp.text();
+    const rows=parseCSV(text);
+    ALL_DATA=[];
+    rows.forEach(row=>{
+      if((row['Active']||'').trim().toLowerCase()!=='yes')return;
+      const company=(row['Company']||'').trim();
+      const name=(row['Branch Name']||'').trim();
+      const area=(row['Area']||'').trim();
+      const gov=(row['Governorate']||'').trim();
+      const btype=(row['Type']||'').trim().toLowerCase();
+      const lat=parseFloat(row['Latitude']);
+      const lng=parseFloat(row['Longitude']);
+      if(!CO_MAP[company]||!name||isNaN(lat)||isNaN(lng))return;
+      if(lat<28||lat>31||lng<46||lng>50)return;
+      ALL_DATA.push({n:name,co:CO_MAP[company],company,area,gov,type:btype==='kiosk'?'kiosk':'branch',lat,lng});
     });
-
     document.getElementById('loading').style.display='none';
-    document.getElementById('last-updated').textContent =
-      '↻ Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('last-updated').textContent='↻ Updated '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     render();
-
     if(manual){
-      // brief flash confirmation
-      const btn = document.getElementById('refresh-btn');
-      btn.textContent = '✓ Refreshed!';
-      btn.style.background = '#065f46';
-      btn.style.borderColor = '#16a34a';
-      setTimeout(()=>{ btn.textContent='↻ Refresh'; btn.style.background=''; btn.style.borderColor=''; },2000);
+      const btn=document.querySelector('#controls button');
+      btn.textContent='✓ Done!';btn.style.background='#065f46';btn.style.borderColor='#16a34a';
+      setTimeout(()=>{btn.textContent='↻ Refresh';btn.style.background='';btn.style.borderColor='';},2000);
     }
-
-  } catch(e) {
-    document.getElementById('loading').innerHTML =
-      `<div style="text-align:center;padding:20px;">
-        <div style="color:#ef4444;font-size:24px;margin-bottom:12px;">⚠️</div>
-        <div style="color:#ef4444;font-size:14px;font-weight:600;margin-bottom:8px;">Could not load Google Sheet</div>
-        <div style="color:#6b7280;font-size:12px;line-height:1.6;max-width:320px;">
-          Make sure the sheet is published:<br>
-          <strong style="color:#9ca3af;">File → Share → Publish to web → CSV</strong><br><br>
-          <button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px;">↻ Try again</button>
-        </div>
-      </div>`;
-    console.error('Sheet load error:', e);
+  }catch(e){
+    document.getElementById('loading').innerHTML=`<div style="text-align:center;padding:20px;">
+      <div style="color:#ef4444;font-size:14px;font-weight:600;margin-bottom:8px;">⚠️ Could not load Google Sheet</div>
+      <div style="color:#6b7280;font-size:12px;margin-bottom:12px;">Make sure the sheet is published as CSV</div>
+      <button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px;">↻ Try again</button>
+    </div>`;
   }
 }
 
@@ -289,8 +442,8 @@ function getActive(){
   const muz=document.getElementById('cb-muzaini').checked;
   const mul=document.getElementById('cb-mulla').checked;
   const ans=document.getElementById('cb-ansari').checked;
-  const br =document.getElementById('cb-branch').checked;
-  const ki =document.getElementById('cb-kiosk').checked;
+  const br=document.getElementById('cb-branch').checked;
+  const ki=document.getElementById('cb-kiosk').checked;
   return ALL_DATA.filter(b=>{
     const coOk=(b.co==='bec'&&bec)||(b.co==='muzaini'&&muz)||(b.co==='mulla'&&mul)||(b.co==='ansari'&&ans);
     const tyOk=(b.type==='branch'&&br)||(b.type==='kiosk'&&ki);
@@ -298,7 +451,6 @@ function getActive(){
   });
 }
 
-// ── HELPERS ───────────────────────────────────────────────────
 function toXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return{x:p.x,y:p.y};}
 function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
 
@@ -307,7 +459,7 @@ function render(){
   const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
   const branches=getActive();
-  if(!branches.length) return;
+  if(!branches.length)return;
   const zoom=map.getZoom();
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const combined=document.getElementById('cb-combined').checked;
@@ -316,8 +468,7 @@ function render(){
     const img=ctx.createImageData(W,H);const d=img.data;
     const pts=branches.map(b=>toXY(b.lat,b.lng));
     for(let py=0;py<H;py++)for(let px=0;px<W;px++){
-      let v=0;
-      for(const p of pts){const dx=px-p.x,dy=py-p.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<baseR)v+=Math.pow(1-dist/baseR,2);}
+      let v=0;for(const p of pts){const dx=px-p.x,dy=py-p.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<baseR)v+=Math.pow(1-dist/baseR,2);}
       const n=Math.min(v/3.5,1);
       if(n>0.008){let rv,gv,bv,av;
         if(n<.3){const t=n/.3;rv=0;gv=Math.round(t*200);bv=Math.round(200*(1-t));av=Math.round(n*3.3*140);}
@@ -344,8 +495,6 @@ function render(){
       }
     }
   }
-
-  // dots
   const dotR=zoom>11?4.5:zoom>9?3.5:2.5;
   for(const b of branches){
     const{x,y}=toXY(b.lat,b.lng);
@@ -361,8 +510,6 @@ function render(){
       ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=1;ctx.stroke();
     }
   }
-
-  // summary
   const c={bec:{br:0,ki:0},muzaini:{br:0,ki:0},mulla:{br:0,ki:0},ansari:{br:0,ki:0}};
   for(const b of branches)if(c[b.co])c[b.co][b.type==='kiosk'?'ki':'br']++;
   document.getElementById('s-total').textContent=branches.length;
@@ -380,19 +527,12 @@ function render(){
 const tip=document.getElementById('htip');
 const wrap=document.getElementById('map-wrap');
 let hoveredB=null;
-
 function findNearest(mx,my){
-  const zoom=map.getZoom();
-  const r=zoom>11?14:zoom>9?11:9;
+  const zoom=map.getZoom();const r=zoom>11?14:zoom>9?11:9;
   let best=null,minD=r;
-  for(const b of getActive()){
-    const{x,y}=toXY(b.lat,b.lng);
-    const d=Math.sqrt((mx-x)**2+(my-y)**2);
-    if(d<minD){minD=d;best=b;}
-  }
+  for(const b of getActive()){const{x,y}=toXY(b.lat,b.lng);const d=Math.sqrt((mx-x)**2+(my-y)**2);if(d<minD){minD=d;best=b;}}
   return best;
 }
-
 canvas.addEventListener('mousemove',e=>{
   const rect=canvas.getBoundingClientRect();
   const mx=e.clientX-rect.left,my=e.clientY-rect.top;
@@ -407,70 +547,46 @@ canvas.addEventListener('mousemove',e=>{
       document.getElementById('ht-tags').innerHTML=
         `<span class="tag type-${b.type}">${b.type==='kiosk'?'◆ Kiosk':'● Branch'}</span>`+
         (b.area?`<span class="tag">${b.area}</span>`:'')+
-        (b.gov?`<span class="tag">${b.gov}</span>`:'');
-      document.getElementById('ht-addr').textContent=b.address||'';
-      document.getElementById('ht-meta').innerHTML=
-        (b.phone?`<span>📞 ${b.phone}</span>`:'')+
-        (b.hours?`<span>🕐 ${b.hours}</span>`:'');
-      document.getElementById('ht-coords').textContent=`${b.lat.toFixed(5)}°N  ${b.lng.toFixed(5)}°E`;
+        (b.gov?`<span class="tag gov">${b.gov}</span>`:'');
     }
     const wRect=wrap.getBoundingClientRect();
     const tx=e.clientX-wRect.left,ty=e.clientY-wRect.top;
-    const ttW=230,ttH=160;
-    const left=tx>(wRect.width/2)?tx-ttW-14:tx+14;
-    const top=ty>(wRect.height*0.6)?ty-ttH-10:ty+14;
+    const ttW=220,ttH=130;
+    const left=tx>wRect.width/2?tx-ttW-14:tx+14;
+    const top=ty>wRect.height*.6?ty-ttH-10:ty+14;
     tip.style.left=Math.max(4,Math.min(wRect.width-ttW-4,left))+'px';
     tip.style.top=Math.max(4,Math.min(wRect.height-ttH-4,top))+'px';
-    tip.style.display='block';
-    canvas.style.cursor='pointer';
-  } else {
-    hoveredB=null;
-    tip.style.display='none';
-    canvas.style.cursor='default';
-  }
+    tip.style.display='block';canvas.style.cursor='pointer';
+  } else {hoveredB=null;tip.style.display='none';canvas.style.cursor='default';}
 });
 canvas.addEventListener('mouseleave',()=>{hoveredB=null;tip.style.display='none';canvas.style.cursor='default';});
 
-// ── CLICK POPUP ───────────────────────────────────────────────
+// ── CLICK ─────────────────────────────────────────────────────
 canvas.addEventListener('click',e=>{
   const rect=canvas.getBoundingClientRect();
   const b=findNearest(e.clientX-rect.left,e.clientY-rect.top);
   if(b){
     const col=COLORS[b.co];
-    L.popup({maxWidth:260})
-      .setLatLng([b.lat,b.lng])
-      .setContent(`
-        <div style="border-left:3px solid ${col};padding-left:10px;">
-          <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${col};margin-bottom:3px;">${LABELS[b.co]}</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:6px;">${b.n}</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px;font-size:11px;">
-            <span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.type==='kiosk'?'◆ Kiosk':'● Branch'}</span>
-            ${b.area?`<span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.area}</span>`:''}
-            ${b.gov?`<span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.gov}</span>`:''}
-          </div>
-          ${b.address?`<div style="font-size:11px;color:#6b7280;margin-bottom:5px;">📍 ${b.address}</div>`:''}
-          <div style="display:flex;gap:12px;font-size:11px;color:#6b7280;">
-            ${b.phone?`<span>📞 ${b.phone}</span>`:''}
-            ${b.hours?`<span>🕐 ${b.hours}</span>`:''}
-          </div>
-          <div style="font-size:9px;color:#374151;margin-top:6px;font-family:monospace;">${b.lat.toFixed(5)}°N  ${b.lng.toFixed(5)}°E</div>
-        </div>`)
-      .openOn(map);
-  } else {
-    map.closePopup();
-  }
+    L.popup({maxWidth:240}).setLatLng([b.lat,b.lng]).setContent(`
+      <div style="border-left:3px solid ${col};padding-left:10px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${col};margin-bottom:3px;">${LABELS[b.co]}</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px;">${b.n}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px;">
+          <span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.type==='kiosk'?'◆ Kiosk':'● Branch'}</span>
+          ${b.area?`<span style="background:#1e2130;padding:2px 7px;border-radius:4px;color:#9ca3af;">${b.area}</span>`:''}
+          ${b.gov?`<span style="background:#1a2e1a;padding:2px 7px;border-radius:4px;color:#86efac;">${b.gov}</span>`:''}
+        </div>
+      </div>`).openOn(map);
+  } else map.closePopup();
 });
-
 canvas.addEventListener('mousedown',e=>{
   const rect=canvas.getBoundingClientRect();
-  const b=findNearest(e.clientX-rect.left,e.clientY-rect.top);
-  if(!b){
+  if(!findNearest(e.clientX-rect.left,e.clientY-rect.top)){
     const pane=document.querySelector('.leaflet-map-pane');
     if(pane)pane.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY,button:e.button}));
   }
 });
 
-// ── BOOT ──────────────────────────────────────────────────────
 loadData();
 </script>
 </body>
