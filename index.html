@@ -9,12 +9,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf0;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-
-/* ── HEADER ── */
 #header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#0f1117;border-bottom:1px solid #1e2130;flex-shrink:0;flex-wrap:wrap;gap:6px;z-index:1001;}
 #header h1{font-size:13px;font-weight:600;letter-spacing:.4px;color:#e8eaf0;white-space:nowrap;}
 #header h1 span{color:#4b5563;font-weight:400;margin-left:6px;font-size:11px;}
-
 #controls{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
 .btn-group{display:flex;gap:3px;align-items:center;background:#1a1d2e;border:1px solid #2a2d3e;border-radius:7px;padding:3px 7px;}
 .btn-group label{display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;white-space:nowrap;color:#9ca3af;}
@@ -24,20 +21,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
 .ctl-cnt{font-size:10px;color:#6b7280;margin-left:1px;}
 .tog{display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;color:#9ca3af;padding:3px 7px;background:#1a1d2e;border:1px solid #2a2d3e;border-radius:7px;}
 .tog:hover{color:#e8eaf0;}
-.tog input{cursor:pointer;}
-
-/* ── MAP ── */
+#refresh-btn{display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;color:#e8eaf0;padding:4px 10px;background:#1e3a5f;border:1px solid #2563eb;border-radius:7px;white-space:nowrap;font-family:inherit;}
+#refresh-btn:hover{background:#1d4ed8;}
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{width:100%;height:100%;}
 #heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;}
-
-/* ── HOVER TOOLTIP ── */
-#htip{
-  position:absolute;z-index:2000;pointer-events:none;display:none;
-  background:rgba(8,10,18,.97);border:1px solid #2a2d3e;border-radius:10px;
-  padding:11px 15px;width:220px;
-  box-shadow:0 10px 40px rgba(0,0,0,.8);backdrop-filter:blur(10px);
-}
+#htip{position:absolute;z-index:2000;pointer-events:none;display:none;background:rgba(8,10,18,.97);border:1px solid #2a2d3e;border-radius:10px;padding:11px 15px;width:220px;box-shadow:0 10px 40px rgba(0,0,0,.8);backdrop-filter:blur(10px);}
 #htip .ht-bar{height:3px;border-radius:2px;margin-bottom:9px;}
 #htip .ht-co{font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:3px;}
 #htip .ht-name{font-size:13px;font-weight:600;color:#f1f5f9;line-height:1.3;margin-bottom:7px;}
@@ -48,34 +37,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
 #htip .ht-addr{font-size:11px;color:#6b7280;line-height:1.4;margin-bottom:5px;}
 #htip .ht-meta{display:flex;gap:10px;font-size:10px;color:#4b5563;border-top:1px solid #1e2130;padding-top:6px;margin-top:4px;}
 #htip .ht-coords{font-size:9px;color:#374151;font-family:monospace;margin-top:3px;}
-
-/* ── SUMMARY BOX ── */
-#sumbox{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);min-width:140px;}
+#sumbox{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);min-width:150px;}
 #sumbox .st{font-weight:600;color:#e8eaf0;font-size:13px;margin-bottom:6px;}
 .sr{display:flex;justify-content:space-between;gap:10px;margin-bottom:2px;}
 .sl{color:#9ca3af;}.sv{color:#e8eaf0;font-weight:500;}
-
-/* ── LEGEND ── */
+#last-updated{font-size:9px;color:#4b5563;margin-top:6px;border-top:1px solid #1e2130;padding-top:5px;}
 #legend{position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;color:#9ca3af;backdrop-filter:blur(6px);}
 #legend .lt{font-weight:600;color:#e8eaf0;margin-bottom:6px;font-size:12px;}
 .lr{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
 .ls{width:9px;height:9px;border-radius:50%;}
 .ld{width:8px;height:8px;transform:rotate(45deg);}
 .grad-bar{width:80px;height:6px;border-radius:3px;background:linear-gradient(to right,rgba(0,80,255,0),rgba(0,200,100,.5),rgba(255,200,0,.75),rgba(255,80,0,.9),rgba(200,0,0,1));}
-
-/* ── LEAFLET POPUP ── */
 .leaflet-popup-content-wrapper{background:rgba(8,10,18,.97)!important;border:1px solid #2a2d3e!important;border-radius:10px!important;color:#e8eaf0!important;box-shadow:0 8px 32px rgba(0,0,0,.7)!important;}
 .leaflet-popup-content{margin:12px 15px!important;font-size:12px!important;line-height:1.6!important;}
 .leaflet-popup-tip{background:rgba(8,10,18,.97)!important;}
 .leaflet-popup-close-button{color:#9ca3af!important;font-size:16px!important;}
-
-/* ── LOADING ── */
-#loading{position:absolute;inset:0;background:rgba(8,10,18,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;gap:14px;}
+#loading{position:absolute;inset:0;background:rgba(8,10,18,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3000;gap:14px;}
 #loading p{color:#9ca3af;font-size:13px;}
 .spinner{width:32px;height:32px;border:3px solid #1e2130;border-top:3px solid #2563eb;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* ── AREA LABELS ── */
 .area-label{background:transparent!important;border:none!important;box-shadow:none!important;}
 .area-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);}
 </style>
@@ -98,14 +78,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
     <label class="tog"><input type="checkbox" id="cb-grid" checked onchange="toggleGrid()">Grid</label>
     <label class="tog"><input type="checkbox" id="cb-areas" checked onchange="toggleAreas()">Areas</label>
     <label class="tog"><input type="checkbox" id="cb-combined" onchange="render()">Combined heat</label>
+    <button id="refresh-btn" onclick="loadData(true)">↻ Refresh</button>
   </div>
 </div>
 
 <div id="map-wrap">
   <div id="map"></div>
   <canvas id="heat-canvas"></canvas>
-
-  <!-- Hover tooltip -->
   <div id="htip">
     <div class="ht-bar" id="ht-bar"></div>
     <div class="ht-co" id="ht-co"></div>
@@ -115,14 +94,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
     <div class="ht-meta" id="ht-meta"></div>
     <div class="ht-coords" id="ht-coords"></div>
   </div>
-
-  <!-- Summary -->
   <div id="sumbox">
     <div class="st">📍 <span id="s-total">0</span> locations</div>
     <div id="s-rows"></div>
+    <div id="last-updated"></div>
   </div>
-
-  <!-- Legend -->
   <div id="legend">
     <div class="lt">Branch density</div>
     <div class="lr"><div class="grad-bar"></div><span style="font-size:10px">low → high</span></div>
@@ -137,14 +113,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
       </div>
     </div>
   </div>
-
-  <!-- Loading overlay -->
-  <div id="loading"><div class="spinner"></div><p>Loading branch data…</p></div>
+  <div id="loading"><div class="spinner"></div><p id="loading-msg">Loading from Google Sheet…</p></div>
 </div>
 
 <script>
-const COLORS={bec:'#2563eb',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#d97706'};
-const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
+// ── GOOGLE SHEET CSV URL ──────────────────────────────────────
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0DcCB5P3DupJTwxRgcvCPX8RxirRRCV6I8y_oqJpQd-IvsVdVsY52o2csxhwDe8N29nP35gvLmz6-/pub?gid=0&single=true&output=csv';
+
+const COLORS = {bec:'#2563eb',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#d97706'};
+const LABELS = {bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
+const CO_MAP = {'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':'ansari'};
 
 const AREAS=[
   ["KUWAIT CITY",29.3697,47.9783],["MIRQAB",29.368,47.973],["MUBARAKIYA",29.376,47.968],
@@ -160,15 +138,15 @@ const AREAS=[
   ["SHARQ",29.372,47.983],["DAIYA",29.355,47.985],["RAWDA",29.349,47.992]
 ];
 
-// ── MAP INIT ──────────────────────────────────────────────────
+// ── MAP ───────────────────────────────────────────────────────
 const map = L.map('map',{center:[29.28,47.98],zoom:10,zoomControl:true});
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
   attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19
 }).addTo(map);
 
-// ── CANVAS ────────────────────────────────────────────────────
 const canvas = document.getElementById('heat-canvas');
-const ctx = canvas.getContext('2d');
+const ctx    = canvas.getContext('2d');
+
 function resizeCanvas(){
   const w=document.getElementById('map-wrap');
   canvas.width=w.clientWidth; canvas.height=w.clientHeight;
@@ -177,7 +155,7 @@ resizeCanvas();
 window.addEventListener('resize',()=>{resizeCanvas();render();});
 map.on('move zoom',render);
 
-// ── GRID ─────────────────────────────────────────────────────
+// ── GRID ──────────────────────────────────────────────────────
 let gridLayer=null;
 function buildGrid(){
   const lines=[];
@@ -208,24 +186,100 @@ function toggleAreas(){
   else{areaMarkers.forEach(m=>map.removeLayer(m));areaMarkers=[];}
 }
 
-// ── DATA LOADING ──────────────────────────────────────────────
-let ALL_DATA=[];
-async function loadData(){
-  try{
-    const r=await fetch('branches.json');
-    if(!r.ok)throw new Error(`HTTP ${r.status}`);
-    ALL_DATA=await r.json();
+// ── CSV PARSER ────────────────────────────────────────────────
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    // handle quoted fields with commas inside
+    const cols = [];
+    let cur='', inQ=false;
+    for(let c=0;c<lines[i].length;c++){
+      if(lines[i][c]==='"'){ inQ=!inQ; }
+      else if(lines[i][c]===','&&!inQ){ cols.push(cur.trim()); cur=''; }
+      else cur+=lines[i][c];
+    }
+    cols.push(cur.trim());
+    if(cols.length<7) continue;
+    const obj={};
+    headers.forEach((h,idx)=>obj[h]=cols[idx]||'');
+    rows.push(obj);
+  }
+  return rows;
+}
+
+// ── LOAD DATA FROM GOOGLE SHEET ───────────────────────────────
+let ALL_DATA = [];
+
+async function loadData(manual=false){
+  document.getElementById('loading').style.display='flex';
+  document.getElementById('loading-msg').textContent = manual ? 'Refreshing from Google Sheet…' : 'Loading from Google Sheet…';
+
+  try {
+    // Use a CORS proxy for GitHub Pages, direct fetch for local
+    const url = SHEET_CSV_URL + '&t=' + Date.now(); // bust cache
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+
+    ALL_DATA = [];
+    let skipped = 0;
+
+    rows.forEach(row => {
+      const active = (row['Active']||'').trim().toLowerCase();
+      if(active !== 'yes'){ skipped++; return; }
+
+      const company = (row['Company']||'').trim();
+      const name    = (row['Branch Name']||'').trim();
+      const area    = (row['Area']||'').trim();
+      const gov     = (row['Governorate']||'').trim();
+      const btype   = (row['Type']||'').trim().toLowerCase();
+      const lat     = parseFloat(row['Latitude']);
+      const lng     = parseFloat(row['Longitude']);
+      const address = (row['Address']||'').trim();
+      const phone   = (row['Phone']||'').trim();
+      const hours   = (row['Hours']||'').trim();
+
+      if(!CO_MAP[company]) return;
+      if(!name) return;
+      if(isNaN(lat)||isNaN(lng)) return;
+      if(lat<28||lat>31||lng<46||lng>50) return;
+
+      ALL_DATA.push({
+        n:name, co:CO_MAP[company], company, area, gov,
+        type: btype==='kiosk'?'kiosk':'branch',
+        lat, lng, address, phone, hours
+      });
+    });
+
     document.getElementById('loading').style.display='none';
+    document.getElementById('last-updated').textContent =
+      '↻ Updated ' + new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     render();
-  }catch(e){
-    document.getElementById('loading').innerHTML=
-      `<div style="color:#ef4444;font-size:13px;text-align:center;">
-        ❌ Could not load branches.json<br>
-        <span style="font-size:11px;color:#6b7280;margin-top:6px;display:block;">
-          Run: <code style="background:#1e2130;padding:2px 6px;border-radius:4px;">python convert.py</code><br>
-          then serve locally or push to GitHub.
-        </span>
-       </div>`;
+
+    if(manual){
+      // brief flash confirmation
+      const btn = document.getElementById('refresh-btn');
+      btn.textContent = '✓ Refreshed!';
+      btn.style.background = '#065f46';
+      btn.style.borderColor = '#16a34a';
+      setTimeout(()=>{ btn.textContent='↻ Refresh'; btn.style.background=''; btn.style.borderColor=''; },2000);
+    }
+
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      `<div style="text-align:center;padding:20px;">
+        <div style="color:#ef4444;font-size:24px;margin-bottom:12px;">⚠️</div>
+        <div style="color:#ef4444;font-size:14px;font-weight:600;margin-bottom:8px;">Could not load Google Sheet</div>
+        <div style="color:#6b7280;font-size:12px;line-height:1.6;max-width:320px;">
+          Make sure the sheet is published:<br>
+          <strong style="color:#9ca3af;">File → Share → Publish to web → CSV</strong><br><br>
+          <button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px;">↻ Try again</button>
+        </div>
+      </div>`;
+    console.error('Sheet load error:', e);
   }
 }
 
@@ -253,6 +307,7 @@ function render(){
   const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
   const branches=getActive();
+  if(!branches.length) return;
   const zoom=map.getZoom();
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const combined=document.getElementById('cb-combined').checked;
@@ -261,7 +316,8 @@ function render(){
     const img=ctx.createImageData(W,H);const d=img.data;
     const pts=branches.map(b=>toXY(b.lat,b.lng));
     for(let py=0;py<H;py++)for(let px=0;px<W;px++){
-      let v=0;for(const p of pts){const dx=px-p.x,dy=py-p.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<baseR)v+=Math.pow(1-dist/baseR,2);}
+      let v=0;
+      for(const p of pts){const dx=px-p.x,dy=py-p.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<baseR)v+=Math.pow(1-dist/baseR,2);}
       const n=Math.min(v/3.5,1);
       if(n>0.008){let rv,gv,bv,av;
         if(n<.3){const t=n/.3;rv=0;gv=Math.round(t*200);bv=Math.round(200*(1-t));av=Math.round(n*3.3*140);}
@@ -289,7 +345,7 @@ function render(){
     }
   }
 
-  // Draw dots
+  // dots
   const dotR=zoom>11?4.5:zoom>9?3.5:2.5;
   for(const b of branches){
     const{x,y}=toXY(b.lat,b.lng);
@@ -306,7 +362,7 @@ function render(){
     }
   }
 
-  // Summary
+  // summary
   const c={bec:{br:0,ki:0},muzaini:{br:0,ki:0},mulla:{br:0,ki:0},ansari:{br:0,ki:0}};
   for(const b of branches)if(c[b.co])c[b.co][b.type==='kiosk'?'ki':'br']++;
   document.getElementById('s-total').textContent=branches.length;
@@ -320,7 +376,7 @@ function render(){
   });
 }
 
-// ── HOVER TOOLTIP ────────────────────────────────────────────
+// ── HOVER TOOLTIP ─────────────────────────────────────────────
 const tip=document.getElementById('htip');
 const wrap=document.getElementById('map-wrap');
 let hoveredB=null;
@@ -351,16 +407,15 @@ canvas.addEventListener('mousemove',e=>{
       document.getElementById('ht-tags').innerHTML=
         `<span class="tag type-${b.type}">${b.type==='kiosk'?'◆ Kiosk':'● Branch'}</span>`+
         (b.area?`<span class="tag">${b.area}</span>`:'')+
-        (b.gov?`<span class="tag">${b.gov} Gov.</span>`:'');
+        (b.gov?`<span class="tag">${b.gov}</span>`:'');
       document.getElementById('ht-addr').textContent=b.address||'';
       document.getElementById('ht-meta').innerHTML=
         (b.phone?`<span>📞 ${b.phone}</span>`:'')+
         (b.hours?`<span>🕐 ${b.hours}</span>`:'');
       document.getElementById('ht-coords').textContent=`${b.lat.toFixed(5)}°N  ${b.lng.toFixed(5)}°E`;
     }
-    // Smart position — flip sides near edges
     const wRect=wrap.getBoundingClientRect();
-    const tx=e.clientX-wRect.left, ty=e.clientY-wRect.top;
+    const tx=e.clientX-wRect.left,ty=e.clientY-wRect.top;
     const ttW=230,ttH=160;
     const left=tx>(wRect.width/2)?tx-ttW-14:tx+14;
     const top=ty>(wRect.height*0.6)?ty-ttH-10:ty+14;
@@ -376,11 +431,10 @@ canvas.addEventListener('mousemove',e=>{
 });
 canvas.addEventListener('mouseleave',()=>{hoveredB=null;tip.style.display='none';canvas.style.cursor='default';});
 
-// ── CLICK — pinned popup ──────────────────────────────────────
+// ── CLICK POPUP ───────────────────────────────────────────────
 canvas.addEventListener('click',e=>{
   const rect=canvas.getBoundingClientRect();
-  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
-  const b=findNearest(mx,my);
+  const b=findNearest(e.clientX-rect.left,e.clientY-rect.top);
   if(b){
     const col=COLORS[b.co];
     L.popup({maxWidth:260})
@@ -400,15 +454,13 @@ canvas.addEventListener('click',e=>{
             ${b.hours?`<span>🕐 ${b.hours}</span>`:''}
           </div>
           <div style="font-size:9px;color:#374151;margin-top:6px;font-family:monospace;">${b.lat.toFixed(5)}°N  ${b.lng.toFixed(5)}°E</div>
-        </div>
-      `)
+        </div>`)
       .openOn(map);
   } else {
     map.closePopup();
   }
 });
 
-// Allow Leaflet map drag through canvas when not near a dot
 canvas.addEventListener('mousedown',e=>{
   const rect=canvas.getBoundingClientRect();
   const b=findNearest(e.clientX-rect.left,e.clientY-rect.top);
@@ -418,7 +470,7 @@ canvas.addEventListener('mousedown',e=>{
   }
 });
 
-// ── BOOT ─────────────────────────────────────────────────────
+// ── BOOT ──────────────────────────────────────────────────────
 loadData();
 </script>
 </body>
