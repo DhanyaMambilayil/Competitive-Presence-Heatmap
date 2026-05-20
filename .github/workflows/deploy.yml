@@ -1,0 +1,62 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'branches.xlsx'
+      - 'index.html'
+      - 'convert.py'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openpyxl
+
+      - name: Convert Excel → JSON
+        run: python convert.py --xlsx branches.xlsx --json branches.json
+
+      - name: Show conversion summary
+        run: |
+          echo "Generated branches.json:"
+          python3 -c "
+          import json
+          data = json.load(open('branches.json'))
+          from collections import Counter
+          cos = Counter(d['company'] for d in data)
+          print(f'Total: {len(data)} locations')
+          for co, cnt in sorted(cos.items()):
+              print(f'  {co}: {cnt}')
+          "
+
+      - name: Commit branches.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add branches.json
+          git diff --cached --quiet || git commit -m "Auto-update branches.json from Excel [skip ci]"
+          git push
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          exclude_assets: '.github,convert.py,*.md,*.xlsx'
