@@ -113,7 +113,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
       <label><input type="checkbox" id="cb-branch" checked onchange="render()">Branches</label>
       <label><input type="checkbox" id="cb-kiosk" checked onchange="render()">Kiosks</label>
     </div>
-    <label class="tog"><input type="checkbox" id="cb-heat" onchange="render()">Heatmap</label>
+    <label class="tog"><input type="checkbox" id="cb-heat" checked onchange="render()">Heatmap</label>
     <div id="bg-toggle">
       <button class="bgt-btn active" id="btn-map" onclick="setBg('map')">🗺 Map View</button>
       <button class="bgt-btn" id="btn-gov" onclick="setBg('gov')">🏛 Governorate View</button>
@@ -176,72 +176,47 @@ const COLORS={bec:'#3b9edd',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#1e3a8a'};
 const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
 const CO_MAP={'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':'ansari'};
 
-// ── ACCURATE GOV BOUNDARIES from reference maps ───────────────
-// Based on Political Map of Kuwait — 6 governorates
+// ── ACCURATE GOV BOUNDARIES matching reference image ──────────
+// Pastel colors matching reference
 const GOV_DATA=[
   {name:'Al Asimah',key:'asima',
-   fill:'#f0d878',stroke:'#b89020',
-   label:[29.388,47.952],
-   // Small area - Kuwait City peninsula
-   poly:[
-     [29.430,47.848],[29.455,47.875],[29.468,47.930],[29.462,47.980],
-     [29.445,48.020],[29.418,48.042],[29.390,48.048],[29.368,48.035],
-     [29.352,48.010],[29.342,47.985],[29.345,47.950],[29.358,47.905],
-     [29.378,47.870],[29.408,47.848]
-   ]},
+   fill:'#f0d080',stroke:'#c9a030', // pastel yellow
+   label:[29.395,47.942],
+   poly:[[29.455,47.820],[29.472,47.870],[29.470,47.960],[29.452,48.005],
+         [29.425,48.030],[29.395,48.048],[29.368,48.048],[29.352,48.018],
+         [29.338,47.988],[29.330,47.958],[29.342,47.918],[29.362,47.878],
+         [29.392,47.848],[29.425,47.828]]},
   {name:'Hawalli',key:'hawally',
-   fill:'#e8a0b8',stroke:'#a04070',
-   label:[29.312,48.095],
-   // Thin coastal strip east of Asimah
-   poly:[
-     [29.368,48.035],[29.390,48.048],[29.418,48.042],[29.412,48.078],
-     [29.400,48.118],[29.375,48.158],[29.345,48.162],[29.312,48.145],
-     [29.288,48.115],[29.275,48.082],[29.282,48.050],[29.318,48.035],
-     [29.345,48.018],[29.368,48.035]
-   ]},
+   fill:'#f0a0b8',stroke:'#c0507a', // pastel pink
+   label:[29.318,48.085],
+   poly:[[29.368,48.048],[29.395,48.048],[29.408,48.080],[29.398,48.135],
+         [29.372,48.162],[29.342,48.162],[29.310,48.142],[29.288,48.112],
+         [29.278,48.080],[29.288,48.050],[29.320,48.040],[29.352,48.018]]},
   {name:'Mubarak Al Kabeer',key:'mubarak',
-   fill:'#b8a8d8',stroke:'#5030a0',
-   label:[29.238,48.052],
-   // Between Farwaniya/Hawalli and Ahmadi
-   poly:[
-     [29.282,48.050],[29.275,48.082],[29.288,48.115],[29.312,48.145],
-     [29.290,48.162],[29.258,48.162],[29.225,48.142],[29.195,48.112],
-     [29.175,48.072],[29.192,48.032],[29.222,48.012],[29.258,48.012],
-     [29.282,48.050]
-   ]},
+   fill:'#b0a0d8',stroke:'#6040a0', // pastel purple
+   label:[29.240,48.048],
+   poly:[[29.288,48.050],[29.278,48.080],[29.288,48.112],[29.310,48.142],
+         [29.288,48.162],[29.258,48.162],[29.228,48.140],[29.198,48.110],
+         [29.178,48.068],[29.198,48.030],[29.228,48.010],[29.260,48.010]]},
   {name:'Al Ahmadi',key:'ahmadi',
-   fill:'#f0b080',stroke:'#c05820',
-   label:[29.055,48.085],
-   // Large southern governorate
-   poly:[
-     [29.195,47.872],[29.195,48.032],[29.175,48.072],[29.195,48.112],
-     [29.225,48.142],[29.195,48.162],[29.148,48.202],[29.075,48.202],
-     [28.985,48.362],[28.950,48.420],[28.920,48.340],[28.912,48.190],
-     [28.925,47.980],[28.950,47.872]
-   ]},
+   fill:'#f0a870',stroke:'#c06020', // pastel orange
+   label:[29.060,48.080],
+   poly:[[29.198,47.870],[29.198,48.030],[29.178,48.068],[29.198,48.110],
+         [29.228,48.140],[29.198,48.162],[29.148,48.200],[29.078,48.200],
+         [28.985,48.355],[28.952,48.402],[28.928,48.340],[28.918,48.190],
+         [28.930,47.980],[28.950,47.870]]},
   {name:'Al Jahra',key:'jahra',
-   fill:'#98c898',stroke:'#2a7030',
-   label:[29.375,47.530],
-   // Huge western/northern governorate — matches reference exactly
-   poly:[
-     [29.558,47.375],[29.585,47.410],[29.598,47.550],[29.598,47.700],
-     [29.578,47.875],[29.558,47.880],[29.455,47.875],[29.408,47.848],
-     [29.378,47.870],[29.358,47.905],[29.345,47.950],[29.342,47.985],
-     [29.318,48.035],[29.282,48.050],[29.258,48.012],[29.222,48.012],
-     [29.192,48.032],[29.195,47.872],[28.950,47.872],
-     [28.950,47.375]
-   ]},
-  {name:'Al Farwaniyah',key:'farwaniya',
-   fill:'#a8c0e8',stroke:'#2850b0',
-   label:[29.275,47.945],
-   // Between Jahra/Asimah and Mubarak — the central urban gov
-   poly:[
-     [29.345,47.950],[29.358,47.905],[29.378,47.870],[29.408,47.848],
-     [29.430,47.848],[29.418,48.042],[29.390,48.048],[29.368,48.035],
-     [29.345,48.018],[29.318,48.035],[29.282,48.050],[29.258,48.012],
-     [29.222,48.012],[29.192,48.032],[29.195,47.872],[29.342,47.872],
-     [29.342,47.985],[29.345,47.950]
-   ]}
+   fill:'#90c890',stroke:'#307830', // pastel green
+   label:[29.390,47.560],
+   poly:[[29.555,47.375],[29.582,47.500],[29.582,47.800],[29.558,47.872],
+         [29.458,47.872],[29.420,47.872],[29.342,47.872],[29.198,47.872],
+         [28.950,47.872],[28.950,47.375]]},
+  {name:'Farwaniya',key:'farwaniya',
+   fill:'#a0b8e8',stroke:'#3060b0', // pastel blue
+   label:[29.272,47.935],
+   poly:[[29.342,47.872],[29.362,47.878],[29.342,47.918],[29.330,47.958],
+         [29.288,47.978],[29.258,47.978],[29.228,47.968],[29.198,47.948],
+         [29.198,47.872]]}
 ];
 
 // ── MAP ───────────────────────────────────────────────────────
@@ -413,8 +388,8 @@ function showGovPanel(gov,cx,cy){
   ALL_DATA.forEach(b=>{
     const gk=(b.gov||'').toLowerCase();
     let m=false;
-    if(gov.key==='asima')m=gk.includes('asima');
-    else if(gov.key==='hawally')m=gk.includes('hawally');
+    if(gov.key==='asima')m=gk.includes('asima')||gk.includes('capital');
+    else if(gov.key==='hawally')m=gk.includes('hawally')||gk.includes('hawalli');
     else if(gov.key==='mubarak')m=gk.includes('mubarak');
     else if(gov.key==='ahmadi')m=gk.includes('ahmadi');
     else if(gov.key==='jahra')m=gk.includes('jahra');
@@ -472,10 +447,9 @@ async function loadData(manual=false){
   document.getElementById('loading').style.display='flex';
   document.getElementById('lmsg').textContent=manual?'Refreshing…':'Loading from Google Sheet…';
   try{
-    const resp=await fetch(SHEET_CSV);
+    const resp=await fetch(SHEET_CSV+'&t='+Date.now());
     if(!resp.ok)throw new Error('HTTP '+resp.status);
-    const text=await resp.text();
-    const rows=parseCSV(text);
+    const rows=parseCSV(await resp.text());
     ALL_DATA=[];
     rows.forEach(row=>{
       if((row['Active']||'').trim().toLowerCase()!=='yes')return;
@@ -494,11 +468,7 @@ async function loadData(manual=false){
     render();
     if(manual){const b=document.querySelector('.hdr-btn');b.textContent='✓ Done!';b.style.background='#065f46';b.style.borderColor='#16a34a';setTimeout(()=>{b.textContent='↻ Refresh';b.style.background='';b.style.borderColor='';},2000);}
   }catch(e){
-    document.getElementById('loading').innerHTML=`<div style="text-align:center">
-      <div style="color:#ef4444;font-size:14px;margin-bottom:8px">⚠️ Could not load Google Sheet</div>
-      <div style="color:#6b7280;font-size:11px;margin-bottom:12px">${e.message}</div>
-      <button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px">↻ Try again</button>
-    </div>`;
+    document.getElementById('loading').innerHTML=`<div style="text-align:center"><div style="color:#ef4444;font-size:14px;margin-bottom:8px">⚠️ Could not load Google Sheet</div><button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px">↻ Try again</button></div>`;
   }
 }
 
@@ -560,16 +530,22 @@ function drawPin(ctx,x,y,color,iconType,size){
       ctx.fillRect(cx-ic*.08,by+ic*.05,ic*.16,ic*.7);
     });
   } else {
-    // Kiosk / counter icon — simple desk shape
-    // Main body rectangle
-    ctx.fillRect(-ic*.75,-ic*1.55,ic*1.5,ic*1.3);
+    // Kiosk / ATM counter icon
+    // Main body
+    ctx.fillRect(-ic*.75,-ic*1.6,ic*1.5,ic*1.5);
     // Screen
     ctx.fillStyle=color;
-    ctx.fillRect(-ic*.5,-ic*1.42,ic,.ic*.65);
-    // Stand
+    ctx.fillRect(-ic*.5,-ic*1.45,ic,ic*.7);
+    // Keypad dots
     ctx.fillStyle='rgba(255,255,255,.95)';
-    ctx.fillRect(-ic*.15,-ic*.25,ic*.3,ic*.3);
-    ctx.fillRect(-ic*.5,-ic*.05,ic,ic*.12);
+    for(let row=0;row<2;row++)for(let col=0;col<3;col++){
+      ctx.beginPath();
+      ctx.arc(-ic*.4+col*ic*.4,-ic*.55+row*ic*.22,ic*.07,0,Math.PI*2);
+      ctx.fill();
+    }
+    // Stand/base
+    ctx.fillRect(-ic*.3,-ic*.1,ic*.6,ic*.15);
+    ctx.fillRect(-ic*.55,-ic*.05,ic*1.1,ic*.12);
   }
 
   ctx.restore();
@@ -610,7 +586,7 @@ function render(){
   }
 
   // Draw icons
-  const iconSize=zoom>11?4.5:zoom>9?3.2:2.2;
+  const iconSize=zoom>11?7:zoom>9?5.5:4;
   for(const b of branches){
     const{x,y}=toXY(b.lat,b.lng);
     const col=COLORS[b.co];
