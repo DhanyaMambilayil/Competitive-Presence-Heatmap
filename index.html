@@ -471,10 +471,33 @@ let ALL_DATA=[];
 async function loadData(manual=false){
   document.getElementById('loading').style.display='flex';
   document.getElementById('lmsg').textContent=manual?'Refreshing…':'Loading from Google Sheet…';
+
+  // Try direct fetch first, fall back to CORS proxy
+  const urls=[
+    SHEET_CSV+'&t='+Date.now(),
+    'https://api.allorigins.win/raw?url='+encodeURIComponent(SHEET_CSV),
+    'https://corsproxy.io/?'+encodeURIComponent(SHEET_CSV),
+  ];
+
+  let text=null;
+  for(const url of urls){
+    try{
+      const resp=await fetch(url,{cache:'no-cache'});
+      if(resp.ok){text=await resp.text();break;}
+    }catch(e){continue;}
+  }
+
+  if(!text){
+    document.getElementById('loading').innerHTML=`<div style="text-align:center">
+      <div style="color:#ef4444;font-size:14px;margin-bottom:8px">⚠️ Could not load Google Sheet</div>
+      <div style="color:#6b7280;font-size:11px;margin-bottom:12px">Make sure the sheet is published as CSV</div>
+      <button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px">↻ Try again</button>
+    </div>`;
+    return;
+  }
+
   try{
-    const resp=await fetch(SHEET_CSV+'&t='+Date.now());
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    const rows=parseCSV(await resp.text());
+    const rows=parseCSV(text);
     ALL_DATA=[];
     rows.forEach(row=>{
       if((row['Active']||'').trim().toLowerCase()!=='yes')return;
@@ -493,7 +516,10 @@ async function loadData(manual=false){
     render();
     if(manual){const b=document.querySelector('.hdr-btn');b.textContent='✓ Done!';b.style.background='#065f46';b.style.borderColor='#16a34a';setTimeout(()=>{b.textContent='↻ Refresh';b.style.background='';b.style.borderColor='';},2000);}
   }catch(e){
-    document.getElementById('loading').innerHTML=`<div style="text-align:center"><div style="color:#ef4444;font-size:14px;margin-bottom:8px">⚠️ Could not load Google Sheet</div><button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px">↻ Try again</button></div>`;
+    document.getElementById('loading').innerHTML=`<div style="text-align:center">
+      <div style="color:#ef4444;font-size:14px;margin-bottom:8px">⚠️ Error parsing sheet data</div>
+      <button onclick="loadData(true)" style="background:#1e3a5f;border:1px solid #2563eb;color:#e8eaf0;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:12px">↻ Try again</button>
+    </div>`;
   }
 }
 
