@@ -113,7 +113,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
       <label><input type="checkbox" id="cb-branch" checked onchange="render()">Branches</label>
       <label><input type="checkbox" id="cb-kiosk" checked onchange="render()">Kiosks</label>
     </div>
-    <label class="tog"><input type="checkbox" id="cb-heat" checked onchange="render()">Heatmap</label>
+    <label class="tog"><input type="checkbox" id="cb-heat" onchange="render()">Heatmap</label>
     <div id="bg-toggle">
       <button class="bgt-btn active" id="btn-map" onclick="setBg('map')">🗺 Map View</button>
       <button class="bgt-btn" id="btn-gov" onclick="setBg('gov')">🏛 Governorate View</button>
@@ -162,8 +162,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
     <div class="lr"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#16a34a;vertical-align:middle;margin-right:2px"></span> Al Mulla</div>
     <div class="lr"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1e3a8a;vertical-align:middle;margin-right:2px"></span> Al Ansari</div>
     <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
-      <div class="lr">🏛 Pin = Branch</div>
-      <div class="lr">🏧 Pin = Kiosk</div>
+      <div class="lr">📍 Pin = Branch</div>
+      <div class="lr">⬛ Square = Kiosk</div>
     </div>
   </div>
 
@@ -485,75 +485,58 @@ function getActive(){
 function toXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return{x:p.x,y:p.y};}
 function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
 
-// ── DRAW ICONS — map pin style ────────────────────────────────
-function drawPin(ctx,x,y,color,iconType,size){
-  const s=size*2.8; // pin overall size
-  ctx.save();
-  ctx.translate(x,y);
-
-  // ── Pin shape (circle top + pointed bottom) ──
-  ctx.beginPath();
+// ── DRAW ICONS ────────────────────────────────────────────────
+// Branch = map pin with building icon inside
+function drawBranchIcon(ctx,x,y,color,size){
+  const s=size*2.8;
+  ctx.save();ctx.translate(x,y);
   const r=s;
-  // circle
+  // Pin shape
+  ctx.beginPath();
   ctx.arc(0,-r*.45,r*.72,Math.PI*.18,-Math.PI*1.18,true);
-  // point at bottom
   ctx.lineTo(0,r*.85);
   ctx.closePath();
-  ctx.fillStyle=color;
-  ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,.85)';
-  ctx.lineWidth=1.2;
-  ctx.stroke();
-
-  // ── White icon inside ──
-  const ic=r*.38; // icon scale
+  ctx.fillStyle=color;ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.2;ctx.stroke();
+  // Building icon inside
+  const ic=r*.38;
   ctx.fillStyle='rgba(255,255,255,.95)';
-
-  if(iconType==='branch'){
-    // Building / bank icon
-    const bx=-ic*.9, by=-ic*1.55, bw=ic*1.8, bh=ic*1.4;
-    // Base building rect
-    ctx.fillRect(bx,by,bw,bh);
-    // Roof / pediment triangle
-    ctx.beginPath();
-    ctx.moveTo(bx-ic*.15,by);
-    ctx.lineTo(0,-ic*2.05);
-    ctx.lineTo(bx+bw+ic*.15,by);
-    ctx.closePath();ctx.fill();
-    // Door
-    ctx.fillStyle=color;
-    const dw=ic*.45,dh=ic*.65;
-    ctx.fillRect(-dw/2,by+bh-dh,dw,dh);
-    // Columns
-    ctx.fillStyle='rgba(255,255,255,.95)';
-    [-ic*.5,0,ic*.5].forEach(cx=>{
-      ctx.fillRect(cx-ic*.08,by+ic*.05,ic*.16,ic*.7);
-    });
-  } else {
-    // Kiosk / ATM counter icon
-    // Main body
-    ctx.fillRect(-ic*.75,-ic*1.6,ic*1.5,ic*1.5);
-    // Screen
-    ctx.fillStyle=color;
-    ctx.fillRect(-ic*.5,-ic*1.45,ic,ic*.7);
-    // Keypad dots
-    ctx.fillStyle='rgba(255,255,255,.95)';
-    for(let row=0;row<2;row++)for(let col=0;col<3;col++){
-      ctx.beginPath();
-      ctx.arc(-ic*.4+col*ic*.4,-ic*.55+row*ic*.22,ic*.07,0,Math.PI*2);
-      ctx.fill();
-    }
-    // Stand/base
-    ctx.fillRect(-ic*.3,-ic*.1,ic*.6,ic*.15);
-    ctx.fillRect(-ic*.55,-ic*.05,ic*1.1,ic*.12);
-  }
-
+  const bx=-ic*.9,by=-ic*1.55,bw=ic*1.8,bh=ic*1.4;
+  ctx.fillRect(bx,by,bw,bh);
+  ctx.beginPath();ctx.moveTo(bx-ic*.15,by);ctx.lineTo(0,-ic*2.05);ctx.lineTo(bx+bw+ic*.15,by);
+  ctx.closePath();ctx.fill();
+  ctx.fillStyle=color;ctx.fillRect(-ic*.22,by+bh-ic*.65,ic*.45,ic*.65);
+  ctx.fillStyle='rgba(255,255,255,.95)';
+  [-ic*.5,0,ic*.5].forEach(cx=>ctx.fillRect(cx-ic*.08,by+ic*.05,ic*.16,ic*.7));
   ctx.restore();
 }
 
-// Legacy wrappers kept for compatibility
-function drawBranchIcon(ctx,x,y,color,size){drawPin(ctx,x,y,color,'branch',size);}
-function drawKioskIcon(ctx,x,y,color,size){drawPin(ctx,x,y,color,'kiosk',size);}
+// Kiosk = standalone icon (no pin) — square with screen + keypad
+function drawKioskIcon(ctx,x,y,color,size){
+  const s=size*2.4;
+  ctx.save();ctx.translate(x,y-s*.3);
+  // Outer rounded square background
+  const hw=s*.85,hh=s*.85;
+  ctx.beginPath();
+  ctx.roundRect(-hw,-hh,hw*2,hh*2,s*.2);
+  ctx.fillStyle=color;ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.2;ctx.stroke();
+  // Screen (white rect)
+  const sw=s*.9,sh=s*.55;
+  ctx.fillStyle='rgba(255,255,255,.95)';
+  ctx.fillRect(-sw/2,-hh*.7,sw,sh);
+  // Screen inner (color)
+  ctx.fillStyle=color;
+  ctx.fillRect(-sw/2+s*.08,-hh*.7+s*.06,sw-s*.16,sh-s*.1);
+  // Keypad dots (3x2 grid)
+  ctx.fillStyle='rgba(255,255,255,.9)';
+  for(let row=0;row<2;row++)for(let col=0;col<3;col++){
+    ctx.beginPath();
+    ctx.arc(-s*.28+col*s*.28,s*.05+row*s*.22,s*.07,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
 
 // ── RENDER ────────────────────────────────────────────────────
 function render(){
@@ -586,7 +569,7 @@ function render(){
   }
 
   // Draw icons
-  const iconSize=zoom>11?7:zoom>9?5.5:4;
+  const iconSize=zoom>11?3.5:zoom>9?2.5:1.8;
   for(const b of branches){
     const{x,y}=toXY(b.lat,b.lng);
     const col=COLORS[b.co];
