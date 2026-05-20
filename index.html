@@ -126,6 +126,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
       <button class="bgt-btn active" id="btn-govmap" onclick="setBg('govmap')">🗺 Gov map</button>
       <button class="bgt-btn" id="btn-streets" onclick="setBg('streets')">🏙 Streets</button>
     </div>
+    <label class="tog"><input type="checkbox" id="cb-heat" checked onchange="render()">Heatmap</label>
     <label class="tog"><input type="checkbox" id="cb-grid" onchange="toggleGrid()">Grid</label>
     <label class="tog"><input type="checkbox" id="cb-areas" onchange="toggleAreas()">Areas</label>
     <button class="hdr-btn" onclick="loadData(true)">↻ Refresh</button>
@@ -305,17 +306,29 @@ function setBg(mode){
   document.getElementById('btn-streets').classList.toggle('active',mode==='streets');
 
   if(mode==='streets'){
+    // Streets — Voyager tiles + Leaflet colored polygons (canvas hidden)
     map.removeLayer(lightTile);
     voyagerTile.addTo(map);
-    // Show gov canvas in streets mode too — but with low opacity color wash + labels
-    govCanvas.style.display='block';
-    govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    drawGovMap();
+    govCanvas.style.display='none';
+    govCtx.clearRect(0,0,govCanvas.width,govCanvas.height);
+    // Show Leaflet polygons with semi-transparent gov colors
+    govLayers.forEach((l,i)=>{
+      const gov=GOV_DATA[i];
+      l.setStyle({
+        color:gov.color, weight:2.5, opacity:.9,
+        fillColor:gov.fillColor, fillOpacity:.18,
+        dashArray:'6,4'
+      });
+    });
+    // Add name labels
+    govNameMarkers.forEach(m=>m.addTo(map));
   } else {
+    // Gov map mode — canvas draws everything, Leaflet polygons invisible (click only)
     map.removeLayer(voyagerTile);
     lightTile.addTo(map);
     govCanvas.style.display='block';
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
+    govNameMarkers.forEach(m=>map.removeLayer(m));
     drawGovMap();
   }
   render();
@@ -330,60 +343,36 @@ function latLngToPoint(lat,lng){
 function drawGovMap(){
   const W=govCanvas.width,H=govCanvas.height;
   govCtx.clearRect(0,0,W,H);
+  if(currentBg!=='govmap') return;   // streets mode — canvas stays blank
 
-  const isStreets=(currentBg==='streets');
+  // Sea background
+  govCtx.fillStyle='#c8e6f5';
+  govCtx.fillRect(0,0,W,H);
 
-  if(!isStreets){
-    // Gov map mode — full opaque sea background
-    govCtx.fillStyle='#c8e6f5';
-    govCtx.fillRect(0,0,W,H);
-  }
-
-  // Draw each governorate
+  // Draw each governorate — solid fill
   GOV_DATA.forEach(gov=>{
     const pts=gov.poly.map(([lat,lng])=>latLngToPoint(lat,lng));
     if(pts.length<3)return;
-
     govCtx.beginPath();
     drawSmoothPoly(govCtx,pts,true);
-
-    if(isStreets){
-      // Streets mode — transparent color wash so streets show through
-      govCtx.fillStyle=gov.fillColor+'40'; // ~25% opacity
-      govCtx.fill();
-      govCtx.strokeStyle=gov.color+'cc';
-      govCtx.lineWidth=2;
-      govCtx.setLineDash([6,4]);
-      govCtx.stroke();
-      govCtx.setLineDash([]);
-    } else {
-      // Gov map mode — solid fill
-      govCtx.fillStyle=gov.fillColor+'cc';
-      govCtx.fill();
-      govCtx.strokeStyle=gov.color;
-      govCtx.lineWidth=2.5;
-      govCtx.lineJoin='round';
-      govCtx.stroke();
-    }
+    govCtx.fillStyle=gov.fillColor+'cc';
+    govCtx.fill();
+    govCtx.strokeStyle=gov.color;
+    govCtx.lineWidth=2.5;
+    govCtx.lineJoin='round';
+    govCtx.stroke();
   });
 
   // Governorate name labels
   GOV_DATA.forEach(gov=>{
     const[x,y]=latLngToPoint(gov.labelPos[0],gov.labelPos[1]);
     govCtx.save();
-    govCtx.font=`bold ${isStreets?11:13}px "Segoe UI",sans-serif`;
+    govCtx.font='bold 13px "Segoe UI",sans-serif';
     govCtx.textAlign='center';
     govCtx.textBaseline='middle';
-    if(isStreets){
-      // Dark label with coloured shadow on streets
-      govCtx.shadowColor=gov.fillColor;
-      govCtx.shadowBlur=8;
-      govCtx.fillStyle=gov.color;
-    } else {
-      govCtx.shadowColor='rgba(255,255,255,.8)';
-      govCtx.shadowBlur=6;
-      govCtx.fillStyle=gov.color;
-    }
+    govCtx.shadowColor='rgba(255,255,255,.8)';
+    govCtx.shadowBlur=6;
+    govCtx.fillStyle=gov.color;
     govCtx.fillText(gov.name.toUpperCase(),x,y);
     govCtx.shadowBlur=0;
     govCtx.restore();
@@ -414,11 +403,16 @@ function drawSmoothPoly(ctx,pts,closed){
   if(closed)ctx.closePath();
 }
 
-// ── LEAFLET GOV POLYGONS (for click detection) ────────────────
+// ── LEAFLET GOV POLYGONS (for click + streets color fill) ─────
 let govLayers=[];
+let govNameMarkers=[];
 function buildGovLayers(){
-  govLayers.forEach(l=>map.removeLayer(l));govLayers=[];
+  govLayers.forEach(l=>map.removeLayer(l));
+  govNameMarkers.forEach(m=>map.removeLayer(m));
+  govLayers=[];govNameMarkers=[];
+
   GOV_DATA.forEach(gov=>{
+    // Polygon — invisible in govmap mode, colored in streets mode
     const poly=L.polygon(gov.poly,{
       color:gov.color,weight:0,opacity:0,fillOpacity:0,interactive:true
     });
@@ -426,8 +420,23 @@ function buildGovLayers(){
       L.DomEvent.stopPropagation(e);
       showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);
     });
+    poly.on('mouseover',function(){
+      if(currentBg==='streets') this.setStyle({fillOpacity:.28});
+    });
+    poly.on('mouseout',function(){
+      if(currentBg==='streets') this.setStyle({fillOpacity:.18});
+    });
     poly.addTo(map);
     govLayers.push(poly);
+
+    // Name label marker — shown in streets mode
+    const icon=L.divIcon({
+      className:'gov-name-label',
+      html:`<div class="gov-name-lbl" style="color:${gov.color};font-size:11px;">${gov.name.toUpperCase()}</div>`,
+      iconAnchor:[40,8]
+    });
+    const m=L.marker(gov.labelPos,{icon,interactive:false,zIndexOffset:-50});
+    govNameMarkers.push(m);
   });
 }
 buildGovLayers();
@@ -613,20 +622,24 @@ function render(){
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const combined=document.getElementById('cb-combined')&&document.getElementById('cb-combined').checked;
 
-  const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
-  for(const b of branches)if(groups[b.co])groups[b.co].push(b);
-  for(const[co,pts]of Object.entries(groups)){
-    if(!pts.length)continue;
-    const[R,G,B]=hex2rgb(COLORS[co]);
-    for(const b of pts){
-      const{x,y}=toXY(b.lat,b.lng);
-      const r=b.type==='kiosk'?baseR*.65:baseR;
-      const g=heatCtx.createRadialGradient(x,y,0,x,y,r);
-      const a=b.type==='kiosk'?.20:.28;
-      g.addColorStop(0,`rgba(${R},${G},${B},${a})`);
-      g.addColorStop(.45,`rgba(${R},${G},${B},${a*.4})`);
-      g.addColorStop(1,`rgba(${R},${G},${B},0)`);
-      heatCtx.beginPath();heatCtx.arc(x,y,r,0,Math.PI*2);heatCtx.fillStyle=g;heatCtx.fill();
+  const showHeat=document.getElementById('cb-heat').checked;
+
+  if(showHeat){
+    const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
+    for(const b of branches)if(groups[b.co])groups[b.co].push(b);
+    for(const[co,pts]of Object.entries(groups)){
+      if(!pts.length)continue;
+      const[R,G,B]=hex2rgb(COLORS[co]);
+      for(const b of pts){
+        const{x,y}=toXY(b.lat,b.lng);
+        const r=b.type==='kiosk'?baseR*.65:baseR;
+        const g=heatCtx.createRadialGradient(x,y,0,x,y,r);
+        const a=b.type==='kiosk'?.20:.28;
+        g.addColorStop(0,`rgba(${R},${G},${B},${a})`);
+        g.addColorStop(.45,`rgba(${R},${G},${B},${a*.4})`);
+        g.addColorStop(1,`rgba(${R},${G},${B},0)`);
+        heatCtx.beginPath();heatCtx.arc(x,y,r,0,Math.PI*2);heatCtx.fillStyle=g;heatCtx.fill();
+      }
     }
   }
 
