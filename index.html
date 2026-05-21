@@ -179,6 +179,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
     </div>
   </div>
 
+  <!-- Governorate view legend -->
+  <div id="gov-legend" style="display:none;position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;backdrop-filter:blur(6px);">
+    <div style="font-weight:600;color:#e8eaf0;margin-bottom:7px;font-size:12px;">Governorate View</div>
+    <div style="font-size:10px;color:#6b7280;margin-bottom:8px;font-style:italic;">Hover over a dot to see details</div>
+    <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Dot = dominant exchange</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#3b9edd;display:inline-block;border-radius:50%;flex-shrink:0"></span> BEC dominates</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#dc2626;display:inline-block;border-radius:50%;flex-shrink:0"></span> Al Muzaini dominates</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#16a34a;display:inline-block;border-radius:50%;flex-shrink:0"></span> Al Mulla dominates</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#1e3a8a;display:inline-block;border-radius:50%;flex-shrink:0"></span> Al Ansari dominates</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#6b7280;display:inline-block;border-radius:50%;flex-shrink:0"></span> No data</div>
+  </div>
+
   <div id="loading"><div class="spinner"></div><p id="lmsg">Loading from Google Sheet…</p></div>
 </div>
 
@@ -270,6 +282,7 @@ function setBg(mode){
     govNameMarkers.forEach(({marker})=>map.removeLayer(marker));
     document.getElementById('legend').style.display='block';
     document.getElementById('sumbox').style.display='block';
+    document.getElementById('gov-legend').style.display='none';
   } else {
     voyagerTile.addTo(map);
     labelsTile.addTo(map);
@@ -280,6 +293,7 @@ function setBg(mode){
     govNameMarkers.forEach(({marker})=>marker.addTo(map));
     document.getElementById('legend').style.display='none';
     document.getElementById('sumbox').style.display='none';
+    document.getElementById('gov-legend').style.display='block';
   }
   render();
 }
@@ -409,9 +423,12 @@ function buildGovLayers(){
       iconSize:[22,22]
     });
     const m=L.marker(gov.label,{icon,interactive:true,zIndexOffset:600});
-    m.on('click',function(e){
-      L.DomEvent.stopPropagation(e);
+    m.on('mouseover',function(e){
+      clearTimeout(govCloseTimer);
       showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);
+    });
+    m.on('mouseout',function(){
+      govCloseTimer=setTimeout(closeGovPanel,200);
     });
     // Not added to map yet — added in setBg gov mode
     govNameMarkers.push({marker:m,gov});
@@ -435,10 +452,10 @@ function updateGovBubbles(){
       if(m&&stats[b.co])stats[b.co][b.type==='kiosk'?'ki':'br']++;
     });
 
-    // Just update dot color based on dominant company
-    const usT=stats.bec.br+stats.bec.ki+stats.ansari.br+stats.ansari.ki;
-    const compT=stats.muzaini.br+stats.muzaini.ki+stats.mulla.br+stats.mulla.ki;
-    const dotColor=usT>compT?'#3b9edd':usT<compT?'#dc2626':'#6b7280';
+    // Dot color = dominant company color
+    const allTotals=Object.entries(stats).map(([co,v])=>({co,tot:v.br+v.ki}));
+    const topEntry=allTotals.reduce((a,b)=>b.tot>a.tot?b:a,{co:'bec',tot:0});
+    const dotColor=topEntry.tot>0?COLORS[topEntry.co]:'#6b7280';
     const pinHtml=`<div style="width:22px;height:22px;border-radius:50%;background:${dotColor};border:2.5px solid rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;"></div>`;
     marker.setIcon(L.divIcon({className:'gov-count-icon',html:pinHtml,iconAnchor:[11,11],iconSize:[22,22]}));
   });
@@ -544,6 +561,10 @@ function showGovPanel(gov,cx,cy){
 }
 
 function closeGovPanel(){document.getElementById('gov-panel').style.display='none';}
+// Keep panel open if cursor moves onto it
+document.getElementById('gov-panel').addEventListener('mouseenter',()=>clearTimeout(govCloseTimer));
+document.getElementById('gov-panel').addEventListener('mouseleave',closeGovPanel);
+let govCloseTimer=null;
 map.on('click',closeGovPanel);
 
 // ── CSV PARSER ────────────────────────────────────────────────
