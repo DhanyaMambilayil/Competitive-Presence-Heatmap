@@ -263,36 +263,33 @@ const GOV_DATA=[
 // Orange = we present BUT competitors stronger
 // Red    = we NOT present, competitors present
 function drawCompetitiveHeat(ctx,W,H,zoom){
-  // Draw circles at each branch location colored by competitive status
-  const baseR=Math.max(18,Math.min(80,zoom*8-38));
-
-  // For each point, compute influence radius
-  for(const b of ALL_DATA){
+  const baseR=Math.max(25,Math.min(80,zoom*8-38));
+  // Pre-compute screen positions
+  const pts=ALL_DATA.map(b=>{
     const{x,y}=toXY(b.lat,b.lng);
-
-    // Count we vs competitor influence at this exact point
-    let weCount=0, compCount=0;
-    for(const b2 of ALL_DATA){
-      const dx=b2.lng-b.lng, dy=b2.lat-b.lat;
-      const dist=Math.sqrt(dx*dx+dy*dy)*111;
-      const r=baseR*0.009;
-      const influence=Math.max(0,1-dist/r);
-      if(influence<=0)continue;
-      if(b2.co==='bec'||b2.co==='ansari') weCount+=influence;
-      else compCount+=influence;
+    return{x,y,we:b.co==='bec'||b.co==='ansari',r:b.type==='kiosk'?baseR*.6:baseR};
+  });
+  // Draw one radial gradient per point
+  for(const p of pts){
+    let weNear=0,compNear=0;
+    for(const q of pts){
+      const dx=p.x-q.x,dy=p.y-q.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<baseR*1.5){
+        const inf=Math.max(0,1-dist/(baseR*1.5));
+        if(q.we)weNear+=inf; else compNear+=inf;
+      }
     }
-
+    if(weNear===0&&compNear===0)continue;
     let R,G,B;
-    if(weCount>0&&weCount>=compCount){R=22;G=163;B=74;}       // strong green
-    else if(weCount>0&&weCount<compCount){R=234;G=88;B=12;}   // strong orange
-    else{R=220;G=38;B=38;}                                     // strong red
-
-    const r=b.type==='kiosk'?baseR*.6:baseR;
-    const g=ctx.createRadialGradient(x,y,0,x,y,r);
-    g.addColorStop(0,`rgba(${R},${G},${B},0.65)`);
-    g.addColorStop(0.5,`rgba(${R},${G},${B},0.3)`);
+    if(weNear>0&&weNear>=compNear){R=22;G=163;B=74;}
+    else if(weNear>0){R=234;G=88;B=12;}
+    else{R=220;G=38;B=38;}
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+    g.addColorStop(0,`rgba(${R},${G},${B},0.7)`);
+    g.addColorStop(0.6,`rgba(${R},${G},${B},0.35)`);
     g.addColorStop(1,`rgba(${R},${G},${B},0)`);
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fillStyle=g;ctx.fill();
   }
 }
@@ -583,30 +580,44 @@ function render(){
   if(showHeat){
     const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
     for(const b of branches)if(groups[b.co])groups[b.co].push(b);
-    // Combined density heatmap: red=hot, blue=cold
+    // Fast heatmap using radial gradients — red=dense, blue=sparse
     const allBranches=Object.values(groups).flat();
-    const imgData=heatCtx.createImageData(W,H);
-    const d=imgData.data;
-    for(let py=0;py<H;py++){
-      for(let px=0;px<W;px++){
-        let v=0;
-        for(const b of allBranches){
-          const{x,y}=toXY(b.lat,b.lng);
-          const dx=px-x,dy=py-y,dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist<baseR)v+=Math.pow(1-dist/baseR,2)*(b.type==='kiosk'?0.6:1);
-        }
-        const n=Math.min(v/3,1);
-        if(n>0.01){
-          let rv,gv,bv,av;
-          if(n<0.25){const t=n/0.25;rv=0;gv=0;bv=Math.round(180+t*75);av=Math.round(t*120);}
-          else if(n<0.5){const t=(n-0.25)/0.25;rv=0;gv=Math.round(t*200);bv=Math.round(255-t*100);av=Math.round(120+t*60);}
-          else if(n<0.75){const t=(n-0.5)/0.25;rv=Math.round(t*255);gv=200;bv=Math.round(155-t*155);av=Math.round(180+t*40);}
-          else{const t=(n-0.75)/0.25;rv=255;gv=Math.round(200*(1-t));bv=0;av=Math.round(220+t*35);}
-          const i=(py*W+px)*4;d[i]=rv;d[i+1]=gv;d[i+2]=bv;d[i+3]=av;
-        }
-      }
+    // First pass: draw blue base glow for all points
+    for(const b of allBranches){
+      const{x,y}=toXY(b.lat,b.lng);
+      const r=b.type==='kiosk'?baseR*.6:baseR;
+      const g=heatCtx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,'rgba(0,80,220,0.18)');
+      g.addColorStop(1,'rgba(0,80,220,0)');
+      heatCtx.beginPath();heatCtx.arc(x,y,r,0,Math.PI*2);
+      heatCtx.fillStyle=g;heatCtx.fill();
     }
-    heatCtx.putImageData(imgData,0,0);
+    // Second pass: overlay red/yellow for density
+    for(const b of allBranches){
+      const{x,y}=toXY(b.lat,b.lng);
+      // Count nearby points
+      let density=0;
+      for(const b2 of allBranches){
+        const{x:x2,y:y2}=toXY(b2.lat,b2.lng);
+        const d=Math.sqrt((x-x2)**2+(y-y2)**2);
+        if(d<baseR)density+=Math.pow(1-d/baseR,2);
+      }
+      const n=Math.min(density/5,1);
+      if(n<0.15)continue;
+      const r=b.type==='kiosk'?baseR*.5:baseR*.8;
+      const g=heatCtx.createRadialGradient(x,y,0,x,y,r);
+      if(n>0.7){
+        g.addColorStop(0,`rgba(220,30,30,${n*0.7})`);
+        g.addColorStop(0.5,`rgba(255,140,0,${n*0.4})`);
+        g.addColorStop(1,'rgba(255,200,0,0)');
+      } else {
+        g.addColorStop(0,`rgba(255,200,0,${n*0.6})`);
+        g.addColorStop(0.5,`rgba(0,200,100,${n*0.3})`);
+        g.addColorStop(1,'rgba(0,80,220,0)');
+      }
+      heatCtx.beginPath();heatCtx.arc(x,y,r,0,Math.PI*2);
+      heatCtx.fillStyle=g;heatCtx.fill();
+    }
   }
 
   // Draw icons
