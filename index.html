@@ -190,68 +190,70 @@ const CO_MAP={'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':
 const GOV_DATA=[
   {name:'Al Asimah',key:'asima',
    fill:'#7ba7d4',stroke:'#4a78a8',
-   label:[29.388,47.972],
+   label:[29.385,47.968],
+   // Tiny Kuwait City peninsula
    poly:[
-     [29.415,47.935],[29.432,47.955],[29.442,47.988],
-     [29.435,48.020],[29.418,48.040],[29.392,48.048],
-     [29.370,48.038],[29.355,48.012],[29.350,47.982],
-     [29.358,47.952],[29.375,47.932],[29.398,47.928]
+     [29.412,47.938],[29.428,47.958],[29.438,47.990],
+     [29.430,48.018],[29.412,48.038],[29.388,48.044],
+     [29.368,48.035],[29.355,48.010],[29.350,47.982],
+     [29.358,47.952],[29.372,47.935],[29.395,47.930]
    ]},
   {name:'Hawalli',key:'hawally',
    fill:'#e8a0b8',stroke:'#b86080',
-   label:[29.325,48.098],
+   label:[29.318,48.092],
+   // Thin strip right/south of Asimah — does NOT extend west past 48.035
    poly:[
-     [29.392,48.048],[29.418,48.040],[29.412,48.075],
-     [29.400,48.118],[29.375,48.155],[29.348,48.158],
-     [29.318,48.142],[29.292,48.112],[29.278,48.078],
-     [29.285,48.048],[29.318,48.036],[29.348,48.020],
-     [29.370,48.038]
+     [29.388,48.044],[29.412,48.038],[29.408,48.072],
+     [29.395,48.115],[29.372,48.152],[29.345,48.155],
+     [29.315,48.140],[29.290,48.110],[29.278,48.075],
+     [29.282,48.048],[29.315,48.035],[29.345,48.018],
+     [29.368,48.035]
    ]},
   {name:'Mubarak Al Kabeer',key:'mubarak',
    fill:'#7ac8b8',stroke:'#389880',
-   label:[29.240,48.062],
+   label:[29.235,48.055],
+   // Rectangle below Hawalli — coastal strip
    poly:[
-     [29.285,48.048],[29.278,48.078],[29.292,48.112],
-     [29.318,48.142],[29.295,48.158],[29.260,48.158],
-     [29.228,48.138],[29.198,48.108],[29.178,48.068],
-     [29.195,48.030],[29.222,48.014],[29.258,48.016]
+     [29.282,48.048],[29.278,48.075],[29.290,48.110],
+     [29.315,48.140],[29.290,48.155],[29.258,48.155],
+     [29.225,48.135],[29.195,48.105],[29.175,48.065],
+     [29.192,48.028],[29.220,48.012],[29.255,48.015]
    ]},
   {name:'Al Farwaniyah',key:'farwaniya',
    fill:'#d4b86a',stroke:'#a08030',
-   label:[29.272,47.958],
-   // Diamond shape between Jahra and coastal govs
+   label:[29.268,47.952],
+   // Inland only — west of Asimah/Hawalli/Mubarak, east of Jahra
+   // Bounded: north ~29.415, south ~29.195, east ~48.048, west ~47.870
    poly:[
-     [29.350,47.982],[29.358,47.952],[29.375,47.932],
-     [29.398,47.928],[29.415,47.935],[29.418,48.040],
-     [29.392,48.048],[29.370,48.038],[29.348,48.020],
-     [29.318,48.036],[29.285,48.048],[29.258,48.016],
-     [29.222,48.014],[29.195,48.030],[29.195,47.950],
-     [29.218,47.934],[29.255,47.926],[29.292,47.930],
-     [29.322,47.938]
+     [29.415,47.938],[29.412,48.038],[29.388,48.044],
+     [29.368,48.035],[29.345,48.018],[29.315,48.035],
+     [29.282,48.048],[29.255,48.015],[29.220,48.012],
+     [29.192,48.028],[29.192,47.950],[29.215,47.932],
+     [29.252,47.925],[29.290,47.928],[29.320,47.936],
+     [29.348,47.945],[29.395,47.930]
    ]},
   {name:'Al Ahmadi',key:'ahmadi',
    fill:'#7abda8',stroke:'#2a8870',
-   label:[29.065,48.080],
-   // Large southern — starts right below Mubarak/Farwaniya
+   label:[29.062,48.078],
+   // Large southern — from lat 29.192 down to Saudi border
    poly:[
-     [29.195,47.872],[29.195,47.950],[29.195,48.030],
-     [29.178,48.068],[29.198,48.108],[29.228,48.138],
-     [29.200,48.158],[29.148,48.200],[29.078,48.202],
-     [28.988,48.358],[28.952,48.418],[28.922,48.340],
-     [28.912,48.190],[28.928,47.978],[28.950,47.872]
+     [29.192,47.870],[29.192,47.950],[29.192,48.028],
+     [29.175,48.065],[29.195,48.105],[29.225,48.135],
+     [29.195,48.155],[29.145,48.198],[29.075,48.200],
+     [28.985,48.355],[28.950,48.415],[28.920,48.338],
+     [28.910,48.188],[28.925,47.975],[28.950,47.870]
    ]},
   {name:'Al Jahra',key:'jahra',
    fill:'#b8a8d8',stroke:'#7060a8',
-   label:[29.368,47.520],
-   // Large purple — entire north/west. Flat bottom, curved top-right meeting bay
+   label:[29.360,47.510],
+   // Huge — all north/west. Right edge meets Farwaniyah at ~47.930
    poly:[
-     [29.552,47.378],[29.588,47.425],[29.600,47.575],
-     [29.598,47.730],[29.575,47.878],[29.452,47.878],
-     [29.418,47.878],[29.398,47.928],[29.375,47.932],
-     [29.358,47.952],[29.350,47.982],[29.322,47.938],
-     [29.292,47.930],[29.255,47.926],[29.218,47.934],
-     [29.195,47.950],[29.195,47.872],[28.950,47.872],
-     [28.950,47.378]
+     [29.548,47.375],[29.585,47.420],[29.598,47.570],
+     [29.598,47.728],[29.572,47.878],[29.450,47.878],
+     [29.415,47.878],[29.395,47.930],[29.348,47.945],
+     [29.320,47.936],[29.290,47.928],[29.252,47.925],
+     [29.215,47.932],[29.192,47.950],[29.192,47.870],
+     [28.950,47.870],[28.950,47.375]
    ]}
 ];
 
@@ -297,10 +299,11 @@ function drawCompetitiveHeat(ctx,W,H,zoom){
 
 // ── MAP ───────────────────────────────────────────────────────
 const map=L.map('map',{center:[29.15,47.98],zoom:9,zoomControl:false});
+// ── TILE LAYERS ───────────────────────────────────────────────
 const voyagerTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',{
-  attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19});
+  attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19,zIndex:100});
 const labelsTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{
-  attribution:'',subdomains:'abcd',maxZoom:19,zIndex:500});
+  attribution:'',subdomains:'abcd',maxZoom:19,zIndex:600}); // labels always on very top
 
 const govCanvas=document.getElementById('gov-canvas');
 const govCtx=govCanvas.getContext('2d');
@@ -322,20 +325,27 @@ function setBg(mode){
   currentBg=mode;
   document.getElementById('btn-map').classList.toggle('active',mode==='map');
   document.getElementById('btn-gov').classList.toggle('active',mode==='gov');
+
   if(mode==='map'){
+    // MAP VIEW: full voyager streets + labels, no gov canvas
     voyagerTile.addTo(map);
-    labelsTile.addTo(map);       // street labels on top
+    labelsTile.addTo(map);
     document.getElementById('map').style.background='';
     govCanvas.style.display='none';
-    govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    govNameMarkers.forEach(m=>map.removeLayer(m));
+    govCtx.clearRect(0,0,govCanvas.width,govCanvas.height);
+    // Subtle gov outlines only
+    govLayers.forEach((l,i)=>{
+      const gov=GOV_DATA[i];
+      l.setStyle({color:gov.stroke,weight:1.5,opacity:0.5,fillOpacity:0,dashArray:'4,4'});
+    });
   } else {
-    map.removeLayer(voyagerTile);
-    map.removeLayer(labelsTile);
-    document.getElementById('map').style.background='#e8e2d0';
+    // GOV VIEW: voyager base (shows surrounding countries + roads) +
+    //           semi-transparent gov colors on canvas + labels tile on top
+    voyagerTile.addTo(map);   // streets/roads visible underneath
+    labelsTile.addTo(map);    // street names on top
+    document.getElementById('map').style.background='';
     govCanvas.style.display='block';
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    govNameMarkers.forEach(m=>map.removeLayer(m));
     drawGov();
   }
   render();
@@ -355,77 +365,28 @@ function drawGov(){
   govCtx.clearRect(0,0,W,H);
   if(currentBg!=='gov')return;
 
-  // ── Background: light grey land ──
-  govCtx.fillStyle='#e8e2d0';
-  govCtx.fillRect(0,0,W,H);
-
-  // ── Persian Gulf — blue sea (right side) ──
-  govCtx.fillStyle='#aed4ec';
-  govCtx.beginPath();
-  // approximate gulf coastline from north to south
-  const gulfPts=[
-    llToXY(29.60,48.50),llToXY(29.55,48.15),llToXY(29.47,48.06),
-    llToXY(29.40,48.05),llToXY(29.37,48.16),llToXY(29.20,48.20),
-    llToXY(29.08,48.21),llToXY(28.98,48.36),llToXY(28.95,48.50),
-    llToXY(28.80,48.50),llToXY(28.80,48.50),llToXY(29.60,48.50)
-  ];
-  gulfPts.forEach(([x,y],i)=>i===0?govCtx.moveTo(x,y):govCtx.lineTo(x,y));
-  govCtx.closePath();govCtx.fill();
-
-  // ── Iraq — slightly different tone (top left) ──
-  govCtx.fillStyle='#d8d0bc';
-  govCtx.beginPath();
-  const iraqPts=[
-    llToXY(29.60,47.38),llToXY(29.60,47.87),
-    llToXY(28.95,47.87),llToXY(28.95,47.38)
-  ];
-  iraqPts.forEach(([x,y],i)=>i===0?govCtx.moveTo(x,y):govCtx.lineTo(x,y));
-  govCtx.closePath();govCtx.fill();
-
-  // ── Saudi Arabia — bottom ──
-  govCtx.fillStyle='#d8d0bc';
-  govCtx.beginPath();
-  const saPts=[
-    llToXY(28.95,47.38),llToXY(28.95,48.50),
-    llToXY(28.75,48.50),llToXY(28.75,47.38)
-  ];
-  saPts.forEach(([x,y],i)=>i===0?govCtx.moveTo(x,y):govCtx.lineTo(x,y));
-  govCtx.closePath();govCtx.fill();
-
-  // ── Draw governorates ──
+  // Draw governorates as semi-transparent fills — streets show through from tile underneath
   GOV_DATA.forEach(gov=>{
     const pts=gov.poly.map(([lat,lng])=>llToXY(lat,lng));
     govCtx.beginPath();
     drawSharpPoly(govCtx,pts);
-    govCtx.fillStyle=gov.fill+'ee';
+    govCtx.fillStyle=gov.fill+'88'; // ~53% opacity — streets visible
     govCtx.fill();
-    govCtx.strokeStyle=gov.stroke+'99';
-    govCtx.lineWidth=1.5;
+    govCtx.strokeStyle=gov.stroke;
+    govCtx.lineWidth=2;
     govCtx.stroke();
   });
 
-  // ── Labels — dark text with white outline ──
+  // Governorate name labels (bold, readable over streets)
   GOV_DATA.forEach(gov=>{
     const[x,y]=llToXY(gov.label[0],gov.label[1]);
     govCtx.save();
-    govCtx.font='bold 11px "Segoe UI",sans-serif';
+    govCtx.font='bold 12px "Segoe UI",sans-serif';
     govCtx.textAlign='center';govCtx.textBaseline='middle';
-    // white outline
-    govCtx.lineWidth=3;govCtx.strokeStyle='rgba(255,255,255,.9)';
+    govCtx.lineWidth=3;govCtx.strokeStyle='rgba(255,255,255,.95)';
     govCtx.strokeText(gov.name,x,y);
-    govCtx.fillStyle='#2a2a2a';
+    govCtx.fillStyle='#1a1a1a';
     govCtx.fillText(gov.name,x,y);
-    govCtx.restore();
-  });
-
-  // ── Country labels ──
-  [['IRAQ',29.420,47.480],['SAUDI ARABIA',28.820,47.800],['Persian Gulf',29.250,48.400]].forEach(([txt,lat,lng])=>{
-    const[x,y]=llToXY(lat,lng);
-    govCtx.save();
-    govCtx.font=`italic ${txt==='Persian Gulf'?'12':'10'}px "Segoe UI",sans-serif`;
-    govCtx.textAlign='center';govCtx.textBaseline='middle';
-    govCtx.fillStyle=txt==='Persian Gulf'?'#4a90b8':'#888878';
-    govCtx.fillText(txt,x,y);
     govCtx.restore();
   });
 }
