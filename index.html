@@ -30,8 +30,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{width:100%;height:100%;}
-#gov-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:200;}
-#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;}
+#gov-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:200;display:none;}
+#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:500;cursor:default;}
 
 /* Zoom */
 #zoom-btns{position:absolute;bottom:40px;left:10px;z-index:1000;display:flex;flex-direction:column;gap:4px;}
@@ -268,52 +268,55 @@ map.on('move zoom',()=>{drawGov();render();});
 // ── BACKGROUND MODE ───────────────────────────────────────────
 let currentBg='map';
 
-// Pre-load governorate map image
-const govImg=new Image();
-govImg.src=GOV_IMG_B64;
-govImg.onload=()=>{if(currentBg==='gov')drawGov();};
+const govCanvas=document.getElementById('gov-canvas');
+const govCtx=govCanvas.getContext('2d');
+const heatCanvas=document.getElementById('heat-canvas');
+const heatCtx=heatCanvas.getContext('2d');
 
-// Image geo bounds — calibrated from landmark positions in image
-const IMG_SW=[28.62,46.45]; // bottom-left [lat,lng]
-const IMG_NE=[30.01,48.78]; // top-right [lat,lng]
+function resize(){
+  const w=document.getElementById('map-wrap');
+  govCanvas.width=heatCanvas.width=w.clientWidth;
+  govCanvas.height=heatCanvas.height=w.clientHeight;
+}
+resize();
+window.addEventListener('resize',()=>{resize();render();});
+map.on('move zoom',()=>{render();});
+
+// Leaflet image overlay — geo-registers perfectly
+const IMG_BOUNDS=[[28.25,46.20],[30.20,49.35]]; // SW, NE corners
+let govOverlay=null;
 
 function setBg(mode){
   currentBg=mode;
   document.getElementById('btn-map').classList.toggle('active',mode==='map');
   document.getElementById('btn-gov').classList.toggle('active',mode==='gov');
+
   if(mode==='map'){
     voyagerTile.addTo(map);
     labelsTile.addTo(map);
     document.getElementById('map').style.background='';
     govCanvas.style.display='none';
-    govCtx.clearRect(0,0,govCanvas.width,govCanvas.height);
+    if(govOverlay)map.removeLayer(govOverlay);
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    govNameMarkers.forEach(m=>map.removeLayer(m));
   } else {
     map.removeLayer(voyagerTile);
     map.removeLayer(labelsTile);
-    document.getElementById('map').style.background='#ccd9e8';
-    govCanvas.style.display='block';
+    document.getElementById('map').style.background='#b8d4e8';
+    govCanvas.style.display='none'; // not needed — overlay handles it
+    // Create overlay once, reuse after
+    if(!govOverlay){
+      govOverlay=L.imageOverlay(GOV_IMG_B64,IMG_BOUNDS,{opacity:1,zIndex:200});
+    }
+    govOverlay.addTo(map);
+    // Fit map to Kuwait bounds
+    map.fitBounds([[28.45,46.55],[29.75,48.55]],{padding:[20,20]});
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    govNameMarkers.forEach(m=>map.removeLayer(m));
-    drawGov();
   }
   render();
 }
 
 function llToXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return[p.x,p.y];}
-
-function drawGov(){
-  const W=govCanvas.width,H=govCanvas.height;
-  govCtx.clearRect(0,0,W,H);
-  if(currentBg!=='gov'||!govImg.complete)return;
-  // Convert image geo corners to canvas pixels
-  const sw=map.latLngToContainerPoint([IMG_SW[0],IMG_SW[1]]);
-  const ne=map.latLngToContainerPoint([IMG_NE[0],IMG_NE[1]]);
-  const x=ne.x, y=ne.y;
-  const w=sw.x-ne.x, h=sw.y-ne.y;
-  if(w>0&&h>0) govCtx.drawImage(govImg,x,y,w,h);
-}
+function drawGov(){} // no-op — imageOverlay handles rendering
 
 // ── LEAFLET GOV POLYGONS (invisible, click only) ──────────────
 let govLayers=[],govNameMarkers=[];
