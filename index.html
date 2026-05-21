@@ -97,6 +97,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 .spinner{width:32px;height:32px;border:3px solid #1e2130;border-top:3px solid #2563eb;border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .gov-name-label{background:transparent!important;border:none!important;box-shadow:none!important;}
+.gov-count-icon{background:transparent!important;border:none!important;box-shadow:none!important;cursor:pointer!important;}
 </style>
 </head>
 <body>
@@ -264,6 +265,7 @@ function setBg(mode){
     labelsTile.addTo(map);
     document.getElementById('map').style.background='';
     govCanvas.style.display='none';
+    heatCanvas.style.pointerEvents='all';
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
     govNameMarkers.forEach(({marker})=>map.removeLayer(marker));
     document.getElementById('legend').style.display='block';
@@ -273,7 +275,7 @@ function setBg(mode){
     labelsTile.addTo(map);
     document.getElementById('map').style.background='';
     govCanvas.style.display='none';
-    // No boundaries — plain map
+    heatCanvas.style.pointerEvents='none'; // let marker clicks pass through
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
     govNameMarkers.forEach(({marker})=>marker.addTo(map));
     document.getElementById('legend').style.display='none';
@@ -400,16 +402,16 @@ function buildGovLayers(){
     poly.addTo(map);govLayers.push(poly);
 
     // Count bubble marker — styled after data loads
-    const icon=L.divIcon({className:'gov-count-icon',
-      html:`<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;">
-        <div style="width:14px;height:14px;border-radius:50%;background:rgba(30,32,53,.9);border:2px solid #6b7280;box-shadow:0 2px 6px rgba(0,0,0,.4);"></div>
-      </div>`,iconAnchor:[7,7]});
+    const icon=L.divIcon({
+      className:'gov-count-icon',
+      html:`<div style="width:22px;height:22px;border-radius:50%;background:rgba(30,32,53,.9);border:2.5px solid #6b7280;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;"></div>`,
+      iconAnchor:[11,11],
+      iconSize:[22,22]
+    });
     const m=L.marker(gov.label,{icon,interactive:true,zIndexOffset:600});
     m.on('click',function(e){
       L.DomEvent.stopPropagation(e);
-      const rect=document.getElementById('map-wrap').getBoundingClientRect();
-      const pt=map.latLngToContainerPoint(gov.label);
-      showGovPanel(gov,rect.left+pt.x,rect.top+pt.y);
+      showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);
     });
     // Not added to map yet — added in setBg gov mode
     govNameMarkers.push({marker:m,gov});
@@ -437,10 +439,8 @@ function updateGovBubbles(){
     const usT=stats.bec.br+stats.bec.ki+stats.ansari.br+stats.ansari.ki;
     const compT=stats.muzaini.br+stats.muzaini.ki+stats.mulla.br+stats.mulla.ki;
     const dotColor=usT>compT?'#3b9edd':usT<compT?'#dc2626':'#6b7280';
-    const pinHtml=`<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;">
-      <div style="width:14px;height:14px;border-radius:50%;background:${dotColor};border:2px solid rgba(255,255,255,.7);box-shadow:0 2px 8px rgba(0,0,0,.5);"></div>
-    </div>`;
-    marker.setIcon(L.divIcon({className:'gov-count-icon',html:pinHtml,iconAnchor:[7,7]}));
+    const pinHtml=`<div style="width:22px;height:22px;border-radius:50%;background:${dotColor};border:2.5px solid rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;"></div>`;
+    marker.setIcon(L.divIcon({className:'gov-count-icon',html:pinHtml,iconAnchor:[11,11],iconSize:[22,22]}));
   });
 }
 
