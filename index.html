@@ -183,12 +183,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
   <div id="gov-legend" style="display:none;position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;backdrop-filter:blur(6px);">
     <div style="font-weight:600;color:#e8eaf0;margin-bottom:7px;font-size:12px;">Governorate View</div>
     <div style="font-size:10px;color:#6b7280;margin-bottom:8px;font-style:italic;">Hover over a dot to see details</div>
-    <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Dot = dominant exchange</div>
-    <div class="lr"><span style="width:11px;height:11px;background:#3b9edd;display:inline-block;border-radius:50%;flex-shrink:0"></span> BEC dominates</div>
-    <div class="lr"><span style="width:11px;height:11px;background:#dc2626;display:inline-block;border-radius:50%;flex-shrink:0"></span> Al Muzaini dominates</div>
-    <div class="lr"><span style="width:11px;height:11px;background:#16a34a;display:inline-block;border-radius:50%;flex-shrink:0"></span> Al Mulla dominates</div>
-    <div class="lr"><span style="width:11px;height:11px;background:#1e3a8a;display:inline-block;border-radius:50%;flex-shrink:0"></span> Al Ansari dominates</div>
-    <div class="lr"><span style="width:11px;height:11px;background:#6b7280;display:inline-block;border-radius:50%;flex-shrink:0"></span> No data</div>
+    <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Dot color</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#3b9edd;display:inline-block;border-radius:50%;flex-shrink:0"></span> We lead (BEC + Ansari)</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#dc2626;display:inline-block;border-radius:50%;flex-shrink:0"></span> Competitors lead (Muzaini + Mulla)</div>
+    <div class="lr"><span style="width:11px;height:11px;background:#6b7280;display:inline-block;border-radius:50%;flex-shrink:0"></span> Equal / no data</div>
   </div>
 
   <div id="loading"><div class="spinner"></div><p id="lmsg">Loading from Google Sheet…</p></div>
@@ -452,10 +450,10 @@ function updateGovBubbles(){
       if(m&&stats[b.co])stats[b.co][b.type==='kiosk'?'ki':'br']++;
     });
 
-    // Dot color = dominant company color
-    const allTotals=Object.entries(stats).map(([co,v])=>({co,tot:v.br+v.ki}));
-    const topEntry=allTotals.reduce((a,b)=>b.tot>a.tot?b:a,{co:'bec',tot:0});
-    const dotColor=topEntry.tot>0?COLORS[topEntry.co]:'#6b7280';
+    // Dot color: us (BEC+Ansari) vs competitors (Muzaini+Mulla)
+    const usT=stats.bec.br+stats.bec.ki+stats.ansari.br+stats.ansari.ki;
+    const compT=stats.muzaini.br+stats.muzaini.ki+stats.mulla.br+stats.mulla.ki;
+    const dotColor=usT>compT?'#3b9edd':compT>usT?'#dc2626':'#6b7280';
     const pinHtml=`<div style="width:22px;height:22px;border-radius:50%;background:${dotColor};border:2.5px solid rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;"></div>`;
     marker.setIcon(L.divIcon({className:'gov-count-icon',html:pinHtml,iconAnchor:[11,11],iconSize:[22,22]}));
   });
@@ -486,7 +484,7 @@ function showGovPanel(gov,cx,cy){
   const maxT=Math.max(...cos.map(co=>stats[co].branch+stats[co].kiosk),1);
 
   const domC=usT>compT?'#22c55e':usT<compT?'#ef4444':'#f59e0b';
-  const domTxt=usT>compT?'✅ We lead':'⚠️ Competitors lead';
+  const domTxt=usT>compT?'✅ We lead (BEC + Ansari)':usT<compT?'⚠️ Competitors lead (Muzaini + Mulla)':'🟡 Equal presence';
 
   // Dominant company = highest count
   const sorted=Object.entries(stats).sort((a,b)=>(b[1].branch+b[1].kiosk)-(a[1].branch+a[1].kiosk));
@@ -721,8 +719,8 @@ function render(){
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const showHeat=document.getElementById('cb-heat').checked;
 
-  // Competitive and heatmap only in map view
-  if(currentBg==='gov') return render_summary();
+  // Competitive and heatmap render in both modes
+  // (pointer-events:none in gov mode so dots stay clickable)
 
   // Competitive heatmap
   if(document.getElementById('cb-comp')&&document.getElementById('cb-comp').checked&&ALL_DATA.length){
