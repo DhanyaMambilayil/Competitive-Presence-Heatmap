@@ -245,7 +245,7 @@ const GOV_DATA=[
 ];
 
 // ── MAP ───────────────────────────────────────────────────────
-const map=L.map('map',{center:[29.15,47.98],zoom:9,zoomControl:false});
+const map=L.map('map',{center:[29.20,47.98],zoom:8,zoomControl:false});
 const voyagerTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',{
   attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19});
 const labelsTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{
@@ -273,11 +273,9 @@ const govImg=new Image();
 govImg.src=GOV_IMG_B64;
 govImg.onload=()=>{if(currentBg==='gov')drawGov();};
 
-// Image geo bounds — calibrated precisely:
-// Image top-left corner = NW Kuwait (Iraq border ~29.75N, 46.30E)
-// Image bottom-right corner = SE Kuwait (Saudi/Gulf ~28.35N, 49.10E)
-const IMG_SW=[28.35,46.30]; // bottom-left [lat,lng]
-const IMG_NE=[29.75,49.10]; // top-right [lat,lng]
+// Image geo bounds — calibrated from landmark positions in image
+const IMG_SW=[28.62,46.45]; // bottom-left [lat,lng]
+const IMG_NE=[30.01,48.78]; // top-right [lat,lng]
 
 function setBg(mode){
   currentBg=mode;
