@@ -30,8 +30,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{width:100%;height:100%;}
-#gov-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:200;display:none;}
-#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:500;cursor:default;}
+#gov-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:200;}
+#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;}
 
 /* Zoom */
 #zoom-btns{position:absolute;bottom:40px;left:10px;z-index:1000;display:flex;flex-direction:column;gap:4px;}
@@ -158,30 +158,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 
   <div id="legend">
     <div class="lt">Legend</div>
-
     <div style="margin-bottom:7px;padding-bottom:7px;border-bottom:.5px solid #1e2130;">
       <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Icon types</div>
-      <div class="lr">
-        <svg width="14" height="18" viewBox="0 0 14 18"><path d="M7 0C4.24 0 2 2.24 2 5c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5z" fill="#3b9edd"/><rect x="4.5" y="2.5" width="5" height="4" fill="white" rx="0.3"/><polygon points="3.8,2.5 7,0.5 10.2,2.5" fill="white"/><rect x="5.8" y="3.2" width="0.8" height="2.5" fill="#3b9edd"/><rect x="7.4" y="3.2" width="0.8" height="2.5" fill="#3b9edd"/></svg>
-        Branch (pin)
-      </div>
-      <div class="lr">
-        <svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2" fill="#3b9edd"/><rect x="3" y="3" width="10" height="6" fill="white" rx="0.5"/><rect x="4" y="3.5" width="8" height="4.5" fill="#3b9edd" rx="0.3"/><circle cx="4.5" cy="11" r="1" fill="white"/><circle cx="8" cy="11" r="1" fill="white"/><circle cx="11.5" cy="11" r="1" fill="white"/></svg>
-        Kiosk (square)
-      </div>
+      <div class="lr"><svg width="14" height="18" viewBox="0 0 14 18"><path d="M7 0C4.24 0 2 2.24 2 5c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5z" fill="#3b9edd"/><rect x="4.5" y="2.5" width="5" height="4" fill="white" rx="0.3"/><polygon points="3.8,2.5 7,0.5 10.2,2.5" fill="white"/><rect x="5.8" y="3.2" width="0.8" height="2.5" fill="#3b9edd"/><rect x="7.4" y="3.2" width="0.8" height="2.5" fill="#3b9edd"/></svg> Branch (pin)</div>
+      <div class="lr"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="2" fill="#3b9edd"/><rect x="3" y="3" width="10" height="6" fill="white" rx="0.5"/><rect x="4" y="3.5" width="8" height="4.5" fill="#3b9edd" rx="0.3"/><circle cx="4.5" cy="11" r="1" fill="white"/><circle cx="8" cy="11" r="1" fill="white"/><circle cx="11.5" cy="11" r="1" fill="white"/></svg> Kiosk (square)</div>
     </div>
-
     <div style="margin-bottom:7px;padding-bottom:7px;border-bottom:.5px solid #1e2130;">
       <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Heatmap density</div>
-      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
-        <div style="width:80px;height:7px;border-radius:3px;background:linear-gradient(to right,#00a03c,#c8c800,#dc6000,#dc1c1c)"></div>
-        <span style="font-size:9px;color:#6b7280">low → high</span>
-      </div>
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;"><div style="width:80px;height:7px;border-radius:3px;background:linear-gradient(to right,#00a03c,#c8c800,#dc6000,#dc1c1c)"></div><span style="font-size:9px;color:#6b7280">low → high</span></div>
       <div class="lr"><span style="width:9px;height:9px;background:#00a03c;display:inline-block;border-radius:50%;flex-shrink:0"></span> Sparse / isolated</div>
       <div class="lr"><span style="width:9px;height:9px;background:#c8c800;display:inline-block;border-radius:50%;flex-shrink:0"></span> Moderate cluster</div>
       <div class="lr"><span style="width:9px;height:9px;background:#dc1c1c;display:inline-block;border-radius:50%;flex-shrink:0"></span> Dense cluster</div>
     </div>
-
     <div>
       <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Competitive view</div>
       <div class="lr"><span style="width:11px;height:11px;background:#22c55e;display:inline-block;border-radius:50%;flex-shrink:0"></span> We're stronger</div>
@@ -194,8 +182,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 </div>
 
 <script>
-
-const GOV_IMG_B64="gov_map.png"; // loaded from repo
 const SHEET_CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vR0DcCB5P3DupJTwxRgcvCPX8RxirRRCV6I8y_oqJpQd-IvsVdVsY52o2csxhwDe8N29nP35gvLmz6-/pub?gid=0&single=true&output=csv';
 const COLORS={bec:'#3b9edd',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#1e3a8a'};
 const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
@@ -245,7 +231,7 @@ const GOV_DATA=[
 ];
 
 // ── MAP ───────────────────────────────────────────────────────
-const map=L.map('map',{center:[29.20,47.98],zoom:8,zoomControl:false});
+const map=L.map('map',{center:[29.15,47.98],zoom:9,zoomControl:false});
 const voyagerTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png',{
   attribution:'&copy; OpenStreetMap &copy; CARTO',subdomains:'abcd',maxZoom:19});
 const labelsTile=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{
@@ -267,30 +253,13 @@ map.on('move zoom',()=>{drawGov();render();});
 
 // ── BACKGROUND MODE ───────────────────────────────────────────
 let currentBg='map';
-
-const govCanvas=document.getElementById('gov-canvas');
-const govCtx=govCanvas.getContext('2d');
-const heatCanvas=document.getElementById('heat-canvas');
-const heatCtx=heatCanvas.getContext('2d');
-
-function resize(){
-  const w=document.getElementById('map-wrap');
-  govCanvas.width=heatCanvas.width=w.clientWidth;
-  govCanvas.height=heatCanvas.height=w.clientHeight;
-}
-resize();
-window.addEventListener('resize',()=>{resize();render();});
-map.on('move zoom',()=>{render();});
-
-// Leaflet image overlay — geo-registers perfectly
-const IMG_BOUNDS=[[28.25,46.20],[30.20,49.35]]; // SW, NE corners
+const IMG_BOUNDS=[[28.25,46.20],[30.20,49.35]];
 let govOverlay=null;
 
 function setBg(mode){
   currentBg=mode;
   document.getElementById('btn-map').classList.toggle('active',mode==='map');
   document.getElementById('btn-gov').classList.toggle('active',mode==='gov');
-
   if(mode==='map'){
     voyagerTile.addTo(map);
     labelsTile.addTo(map);
@@ -298,25 +267,120 @@ function setBg(mode){
     govCanvas.style.display='none';
     if(govOverlay)map.removeLayer(govOverlay);
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
+    govNameMarkers.forEach(m=>map.removeLayer(m));
   } else {
     map.removeLayer(voyagerTile);
     map.removeLayer(labelsTile);
     document.getElementById('map').style.background='#b8d4e8';
-    govCanvas.style.display='none'; // not needed — overlay handles it
-    // Create overlay once, reuse after
-    if(!govOverlay){
-      govOverlay=L.imageOverlay(GOV_IMG_B64,IMG_BOUNDS,{opacity:1,zIndex:200});
-    }
+    govCanvas.style.display='none';
+    if(!govOverlay) govOverlay=L.imageOverlay('gov_map.png',IMG_BOUNDS,{opacity:1,zIndex:250});
     govOverlay.addTo(map);
-    // Fit map to Kuwait bounds
-    map.fitBounds([[28.45,46.55],[29.75,48.55]],{padding:[20,20]});
+    map.fitBounds([[28.45,46.55],[29.75,48.55]],{padding:[10,10]});
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
+    govNameMarkers.forEach(m=>map.removeLayer(m));
   }
   render();
 }
 
 function llToXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return[p.x,p.y];}
-function drawGov(){} // no-op — imageOverlay handles rendering
+
+function drawSmoothPoly(ctx,pts){
+  if(pts.length<3)return;
+  ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=0;i<pts.length;i++){
+    const p0=pts[(i-1+pts.length)%pts.length];
+    const p1=pts[i];
+    const p2=pts[(i+1)%pts.length];
+    const p3=pts[(i+2)%pts.length];
+    const t=0.35;
+    const cp1x=p1[0]+(p2[0]-p0[0])*t/2;
+    const cp1y=p1[1]+(p2[1]-p0[1])*t/2;
+    const cp2x=p2[0]-(p3[0]-p1[0])*t/2;
+    const cp2y=p2[1]-(p3[1]-p1[1])*t/2;
+    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2[0],p2[1]);
+  }
+  ctx.closePath();
+}
+
+function drawGov(){
+  const W=govCanvas.width,H=govCanvas.height;
+  govCtx.clearRect(0,0,W,H);
+  if(currentBg!=='gov')return;
+
+  // ── Background: light grey land ──
+  govCtx.fillStyle='#e8e2d0';
+  govCtx.fillRect(0,0,W,H);
+
+  // ── Persian Gulf — blue sea (right side) ──
+  govCtx.fillStyle='#aed4ec';
+  govCtx.beginPath();
+  // approximate gulf coastline from north to south
+  const gulfPts=[
+    llToXY(29.60,48.50),llToXY(29.55,48.15),llToXY(29.47,48.06),
+    llToXY(29.40,48.05),llToXY(29.37,48.16),llToXY(29.20,48.20),
+    llToXY(29.08,48.21),llToXY(28.98,48.36),llToXY(28.95,48.50),
+    llToXY(28.80,48.50),llToXY(28.80,48.50),llToXY(29.60,48.50)
+  ];
+  gulfPts.forEach(([x,y],i)=>i===0?govCtx.moveTo(x,y):govCtx.lineTo(x,y));
+  govCtx.closePath();govCtx.fill();
+
+  // ── Iraq — slightly different tone (top left) ──
+  govCtx.fillStyle='#d8d0bc';
+  govCtx.beginPath();
+  const iraqPts=[
+    llToXY(29.60,47.38),llToXY(29.60,47.87),
+    llToXY(28.95,47.87),llToXY(28.95,47.38)
+  ];
+  iraqPts.forEach(([x,y],i)=>i===0?govCtx.moveTo(x,y):govCtx.lineTo(x,y));
+  govCtx.closePath();govCtx.fill();
+
+  // ── Saudi Arabia — bottom ──
+  govCtx.fillStyle='#d8d0bc';
+  govCtx.beginPath();
+  const saPts=[
+    llToXY(28.95,47.38),llToXY(28.95,48.50),
+    llToXY(28.75,48.50),llToXY(28.75,47.38)
+  ];
+  saPts.forEach(([x,y],i)=>i===0?govCtx.moveTo(x,y):govCtx.lineTo(x,y));
+  govCtx.closePath();govCtx.fill();
+
+  // ── Draw governorates ──
+  GOV_DATA.forEach(gov=>{
+    const pts=gov.poly.map(([lat,lng])=>llToXY(lat,lng));
+    govCtx.beginPath();
+    drawSmoothPoly(govCtx,pts);
+    govCtx.fillStyle=gov.fill+'ee';
+    govCtx.fill();
+    govCtx.strokeStyle=gov.stroke+'99';
+    govCtx.lineWidth=1.5;
+    govCtx.stroke();
+  });
+
+  // ── Labels — dark text with white outline ──
+  GOV_DATA.forEach(gov=>{
+    const[x,y]=llToXY(gov.label[0],gov.label[1]);
+    govCtx.save();
+    govCtx.font='bold 11px "Segoe UI",sans-serif';
+    govCtx.textAlign='center';govCtx.textBaseline='middle';
+    // white outline
+    govCtx.lineWidth=3;govCtx.strokeStyle='rgba(255,255,255,.9)';
+    govCtx.strokeText(gov.name,x,y);
+    govCtx.fillStyle='#2a2a2a';
+    govCtx.fillText(gov.name,x,y);
+    govCtx.restore();
+  });
+
+  // ── Country labels ──
+  [['IRAQ',29.420,47.480],['SAUDI ARABIA',28.820,47.800],['Persian Gulf',29.250,48.400]].forEach(([txt,lat,lng])=>{
+    const[x,y]=llToXY(lat,lng);
+    govCtx.save();
+    govCtx.font=`italic ${txt==='Persian Gulf'?'12':'10'}px "Segoe UI",sans-serif`;
+    govCtx.textAlign='center';govCtx.textBaseline='middle';
+    govCtx.fillStyle=txt==='Persian Gulf'?'#4a90b8':'#888878';
+    govCtx.fillText(txt,x,y);
+    govCtx.restore();
+  });
+}
 
 // ── LEAFLET GOV POLYGONS (invisible, click only) ──────────────
 let govLayers=[],govNameMarkers=[];
@@ -327,22 +391,19 @@ function buildGovLayers(){
   GOV_DATA.forEach(gov=>{
     const poly=L.polygon(gov.poly,{fillOpacity:0,weight:0,opacity:0,interactive:true});
     poly.on('click',function(e){L.DomEvent.stopPropagation(e);showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);});
-    poly.on('mouseover',function(){
-      this.setStyle({fillColor:gov.fill,fillOpacity:.2,weight:2,color:gov.stroke,opacity:.9});
-      this.getElement()&&(this.getElement().style.cursor='pointer');
-    });
-    poly.on('mouseout',function(){this.setStyle({fillOpacity:0,weight:0,opacity:0});});
+    poly.on('mouseover',function(){if(currentBg==='map')this.setStyle({fillColor:gov.fill,fillOpacity:.18,weight:2,color:gov.stroke,opacity:.8});});
+    poly.on('mouseout',function(){if(currentBg==='map')this.setStyle({fillOpacity:0,weight:0,opacity:0});});
     poly.addTo(map);govLayers.push(poly);
   });
 }
 buildGovLayers();
 
-// ── GOV PANEL — rich us vs competitors breakdown ──────────────
+// ── GOV PANEL ─────────────────────────────────────────────────
 function showGovPanel(gov,cx,cy){
   const cos=['bec','muzaini','mulla','ansari'];
   const stats={};cos.forEach(co=>stats[co]={branch:0,kiosk:0});
   ALL_DATA.forEach(b=>{
-    const gk=(b.gov||'').toLowerCase();
+    const gk=(b.gov||''). toLowerCase();
     let m=false;
     if(gov.key==='asima')m=gk.includes('asima');
     else if(gov.key==='hawally')m=gk.includes('hawally')||gk.includes('hawalli');
@@ -352,83 +413,51 @@ function showGovPanel(gov,cx,cy){
     else if(gov.key==='farwaniya')m=gk.includes('farwaniya');
     if(m&&stats[b.co])stats[b.co][b.type]++;
   });
-
-  // Aggregate: us (BEC+Ansari) vs competitors (Muzaini+Mulla)
-  const us={branch:stats.bec.branch+stats.ansari.branch, kiosk:stats.bec.kiosk+stats.ansari.kiosk};
-  const comp={branch:stats.muzaini.branch+stats.mulla.branch, kiosk:stats.muzaini.kiosk+stats.mulla.kiosk};
-  const usTotal=us.branch+us.kiosk;
-  const compTotal=comp.branch+comp.kiosk;
-  const grandTotal=usTotal+compTotal;
+  const us={branch:stats.bec.branch+stats.ansari.branch,kiosk:stats.bec.kiosk+stats.ansari.kiosk};
+  const comp={branch:stats.muzaini.branch+stats.mulla.branch,kiosk:stats.muzaini.kiosk+stats.mulla.kiosk};
+  const usT=us.branch+us.kiosk, compT=comp.branch+comp.kiosk;
   const maxT=Math.max(...cos.map(co=>stats[co].branch+stats[co].kiosk),1);
-
-  // Header
+  const domC=usT>compT?'#22c55e':usT<compT?'#ef4444':'#f59e0b';
+  const domTxt=usT>compT?'✅ We lead here':usT<compT?'⚠️ Competitors lead':'🟡 Equal presence';
   document.getElementById('gpt').innerHTML=`<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${gov.fill};border:1px solid ${gov.stroke};margin-right:7px;vertical-align:middle"></span>${gov.name} Governorate`;
-  document.getElementById('gps').textContent=`${grandTotal} total locations`;
-
-  // Determine dominance
-  const domColor=usTotal>compTotal?'#22c55e':usTotal<compTotal?'#ef4444':'#f59e0b';
-  const domText=usTotal>compTotal?'✅ We lead here':usTotal<compTotal?'⚠️ Competitors lead':'🟡 Equal presence';
-
-  let html=`
-    <div style="background:${domColor}22;border:1px solid ${domColor}55;border-radius:7px;padding:7px 10px;margin-bottom:10px;font-size:11px;font-weight:600;color:${domColor};text-align:center;">${domText}</div>
-
-    <!-- US vs COMPETITORS summary -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-      <div style="background:#1a2e1a;border:1px solid #22c55e44;border-radius:8px;padding:8px 10px;text-align:center;">
-        <div style="font-size:10px;color:#86efac;font-weight:600;margin-bottom:4px;">🟢 US (BEC + Ansari)</div>
-        <div style="font-size:20px;font-weight:700;color:#22c55e;">${usTotal}</div>
-        <div style="font-size:10px;color:#6b7280;margin-top:2px;">
-          📍 ${us.branch} branch${us.branch!==1?'es':''} &nbsp; ⬛ ${us.kiosk} kiosk${us.kiosk!==1?'s':''}
-        </div>
-      </div>
-      <div style="background:#2a1a1a;border:1px solid #ef444444;border-radius:8px;padding:8px 10px;text-align:center;">
-        <div style="font-size:10px;color:#fca5a5;font-weight:600;margin-bottom:4px;">🔴 Competitors</div>
-        <div style="font-size:20px;font-weight:700;color:#ef4444;">${compTotal}</div>
-        <div style="font-size:10px;color:#6b7280;margin-top:2px;">
-          📍 ${comp.branch} branch${comp.branch!==1?'es':''} &nbsp; ⬛ ${comp.kiosk} kiosk${comp.kiosk!==1?'s':''}
-        </div>
-      </div>
+  document.getElementById('gps').textContent=`${usT+compT} total locations`;
+  let html=`<div style="background:${domC}22;border:1px solid ${domC}55;border-radius:7px;padding:7px 10px;margin-bottom:10px;font-size:11px;font-weight:600;color:${domC};text-align:center;">${domTxt}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+    <div style="background:#1a2e1a;border:1px solid #22c55e44;border-radius:8px;padding:8px;text-align:center;">
+      <div style="font-size:10px;color:#86efac;font-weight:600;margin-bottom:3px;">🟢 Us (BEC+Ansari)</div>
+      <div style="font-size:22px;font-weight:700;color:#22c55e;">${usT}</div>
+      <div style="font-size:10px;color:#6b7280;">📍${us.branch} ⬛${us.kiosk}</div>
     </div>
-
-    <!-- Per company breakdown -->
-    <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:6px;border-top:1px solid #1e2130;padding-top:8px;">Per company breakdown</div>`;
-
+    <div style="background:#2a1a1a;border:1px solid #ef444444;border-radius:8px;padding:8px;text-align:center;">
+      <div style="font-size:10px;color:#fca5a5;font-weight:600;margin-bottom:3px;">🔴 Competitors</div>
+      <div style="font-size:22px;font-weight:700;color:#ef4444;">${compT}</div>
+      <div style="font-size:10px;color:#6b7280;">📍${comp.branch} ⬛${comp.kiosk}</div>
+    </div>
+  </div>
+  <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:6px;border-top:1px solid #1e2130;padding-top:8px;">Per company</div>`;
   cos.forEach(co=>{
     const br=stats[co].branch,ki=stats[co].kiosk,tot=br+ki;
     const pct=Math.round(tot/maxT*100);
     const isUs=co==='bec'||co==='ansari';
-    html+=`
-    <div style="margin-bottom:6px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+    html+=`<div style="margin-bottom:5px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
         <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#e8eaf0;">
-          <span style="width:8px;height:8px;border-radius:50%;background:${COLORS[co]};display:inline-block;flex-shrink:0"></span>
-          ${LABELS[co]}
+          <span style="width:7px;height:7px;border-radius:50%;background:${COLORS[co]};display:inline-block"></span>${LABELS[co]}
           <span style="font-size:9px;color:${isUs?'#86efac':'#fca5a5'}">${isUs?'(us)':'(comp)'}</span>
         </div>
-        <div style="display:flex;gap:4px;">
-          ${br?`<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:#1e3a5f;color:#93c5fd;">📍 ${br}</span>`:''}
-          ${ki?`<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:#3b1e1e;color:#fca5a5;">⬛ ${ki}</span>`:''}
-          ${!tot?`<span style="font-size:10px;color:#374151;">—</span>`:''}
-        </div>
+        <div style="font-size:10px;color:#9ca3af;">${br?`📍${br} `:''}${ki?`⬛${ki}`:''}${!tot?'—':''}</div>
       </div>
-      <div style="height:4px;background:#1e2130;border-radius:2px;overflow:hidden;">
-        <div style="width:${pct}%;height:100%;background:${COLORS[co]};border-radius:2px;transition:width .3s;"></div>
-      </div>
+      <div style="height:4px;background:#1e2130;border-radius:2px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${COLORS[co]};border-radius:2px;"></div></div>
     </div>`;
   });
-
-  html+=`</div>`;
   document.getElementById('gpb').innerHTML=html;
-
   const panel=document.getElementById('gov-panel');
   const wRect=document.getElementById('map-wrap').getBoundingClientRect();
-  const pw=290,ph=420,tx=cx-wRect.left,ty=cy-wRect.top;
+  const pw=290,ph=430,tx=cx-wRect.left,ty=cy-wRect.top;
   let left=tx+14,top=ty+14;
   if(left+pw>wRect.width-10)left=tx-pw-14;
   if(top+ph>wRect.height-10)top=ty-ph-14;
-  panel.style.left=Math.max(10,left)+'px';
-  panel.style.top=Math.max(10,top)+'px';
-  panel.style.display='block';
+  panel.style.left=Math.max(10,left)+'px';panel.style.top=Math.max(10,top)+'px';panel.style.display='block';
 }
 function closeGovPanel(){document.getElementById('gov-panel').style.display='none';}
 map.on('click',closeGovPanel);
@@ -576,43 +605,30 @@ function render(){
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const showHeat=document.getElementById('cb-heat').checked;
 
-  // Competitive heatmap — radial circles, green/orange/red
+  // Competitive heatmap
   if(document.getElementById('cb-comp')&&document.getElementById('cb-comp').checked&&ALL_DATA.length){
     const compR=Math.max(25,Math.min(85,zoom*9-40));
     const pts=ALL_DATA.map(b=>{const{x,y}=toXY(b.lat,b.lng);return{x,y,we:b.co==='bec'||b.co==='ansari',r:b.type==='kiosk'?compR*.6:compR};});
     for(const p of pts){
       let we=0,comp=0;
-      for(const q of pts){
-        const d=Math.sqrt((p.x-q.x)**2+(p.y-q.y)**2);
-        if(d<compR*1.5){const inf=1-d/(compR*1.5);if(q.we)we+=inf;else comp+=inf;}
-      }
+      for(const q of pts){const d=Math.sqrt((p.x-q.x)**2+(p.y-q.y)**2);if(d<compR*1.5){const inf=1-d/(compR*1.5);if(q.we)we+=inf;else comp+=inf;}}
       if(we===0&&comp===0)continue;
       let R,G,B;
-      if(we>0&&we>=comp){R=34;G=197;B=94;}
-      else if(we>0){R=234;G=100;B=36;}
-      else{R=239;G=68;B=68;}
+      if(we>0&&we>=comp){R=34;G=197;B=94;}else if(we>0){R=234;G=100;B=36;}else{R=239;G=68;B=68;}
       const g=heatCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-      g.addColorStop(0,`rgba(${R},${G},${B},0.72)`);
-      g.addColorStop(0.5,`rgba(${R},${G},${B},0.38)`);
-      g.addColorStop(1,`rgba(${R},${G},${B},0)`);
-      heatCtx.beginPath();heatCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      heatCtx.fillStyle=g;heatCtx.fill();
+      g.addColorStop(0,`rgba(${R},${G},${B},0.72)`);g.addColorStop(0.5,`rgba(${R},${G},${B},0.38)`);g.addColorStop(1,`rgba(${R},${G},${B},0)`);
+      heatCtx.beginPath();heatCtx.arc(p.x,p.y,p.r,0,Math.PI*2);heatCtx.fillStyle=g;heatCtx.fill();
     }
   }
 
-  // Heatmap — red (dense) → yellow → green (sparse)
+  // Heatmap — red=dense, green=sparse
   if(showHeat){
     const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
     for(const b of branches)if(groups[b.co])groups[b.co].push(b);
     const all=Object.values(groups).flat();
-    const densities=all.map(b=>{
-      const{x,y}=toXY(b.lat,b.lng);
-      let v=0;
-      for(const b2 of all){const{x:x2,y:y2}=toXY(b2.lat,b2.lng);const d=Math.sqrt((x-x2)**2+(y-y2)**2);if(d<baseR)v+=Math.pow(1-d/baseR,2);}
-      return{x,y,v,r:b.type==='kiosk'?baseR*.6:baseR};
-    });
-    const maxV=Math.max(...densities.map(d=>d.v),1);
-    for(const d of densities){
+    const dens=all.map(b=>{const{x,y}=toXY(b.lat,b.lng);let v=0;for(const b2 of all){const{x:x2,y:y2}=toXY(b2.lat,b2.lng);const d=Math.sqrt((x-x2)**2+(y-y2)**2);if(d<baseR)v+=Math.pow(1-d/baseR,2);}return{x,y,v,r:b.type==='kiosk'?baseR*.6:baseR};});
+    const maxV=Math.max(...dens.map(d=>d.v),1);
+    for(const d of dens){
       const n=Math.min(d.v/maxV,1);
       let R,G,B;
       if(n>0.6){const t=(n-0.6)/0.4;R=220;G=Math.round(180*(1-t));B=0;}
@@ -620,9 +636,7 @@ function render(){
       else{R=0;G=Math.round(160+n/0.3*60);B=60;}
       const alpha=0.15+n*0.35;
       const g=heatCtx.createRadialGradient(d.x,d.y,0,d.x,d.y,d.r);
-      g.addColorStop(0,`rgba(${R},${G},${B},${alpha})`);
-      g.addColorStop(0.5,`rgba(${R},${G},${B},${alpha*0.4})`);
-      g.addColorStop(1,`rgba(${R},${G},${B},0)`);
+      g.addColorStop(0,`rgba(${R},${G},${B},${alpha})`);g.addColorStop(0.5,`rgba(${R},${G},${B},${alpha*0.4})`);g.addColorStop(1,`rgba(${R},${G},${B},0)`);
       heatCtx.beginPath();heatCtx.arc(d.x,d.y,d.r,0,Math.PI*2);heatCtx.fillStyle=g;heatCtx.fill();
     }
   }
