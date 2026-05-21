@@ -252,9 +252,8 @@ window.addEventListener('resize',()=>{resize();drawGov();render();});
 map.on('move zoom',()=>{drawGov();render();});
 
 // ── BACKGROUND MODE ───────────────────────────────────────────
+// ── BACKGROUND MODE ───────────────────────────────────────────
 let currentBg='map';
-const IMG_BOUNDS=[[28.25,46.20],[30.20,49.35]];
-let govOverlay=null;
 
 function setBg(mode){
   currentBg=mode;
@@ -265,19 +264,18 @@ function setBg(mode){
     labelsTile.addTo(map);
     document.getElementById('map').style.background='';
     govCanvas.style.display='none';
-    if(govOverlay)map.removeLayer(govOverlay);
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    govNameMarkers.forEach(m=>map.removeLayer(m));
+    govNameMarkers.forEach(({marker})=>map.removeLayer(marker));
   } else {
-    map.removeLayer(voyagerTile);
-    map.removeLayer(labelsTile);
-    document.getElementById('map').style.background='#b8d4e8';
+    voyagerTile.addTo(map);
+    labelsTile.addTo(map);
+    document.getElementById('map').style.background='';
     govCanvas.style.display='none';
-    if(!govOverlay) govOverlay=L.imageOverlay('gov_map.png',IMG_BOUNDS,{opacity:1,zIndex:250});
-    govOverlay.addTo(map);
-    map.fitBounds([[28.45,46.55],[29.75,48.55]],{padding:[10,10]});
-    govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
-    govNameMarkers.forEach(m=>map.removeLayer(m));
+    govLayers.forEach((l,i)=>{
+      const gov=GOV_DATA[i];
+      l.setStyle({color:gov.stroke,weight:2.5,opacity:.9,fillColor:gov.fill,fillOpacity:.18,dashArray:null});
+    });
+    govNameMarkers.forEach(({marker})=>marker.addTo(map));
   }
   render();
 }
@@ -382,35 +380,64 @@ function drawGov(){
   });
 }
 
-// ── LEAFLET GOV POLYGONS (invisible, click only) ──────────────
+// ── LEAFLET GOV POLYGONS + COUNT ICONS ───────────────────────
 let govLayers=[],govNameMarkers=[];
 function buildGovLayers(){
   govLayers.forEach(l=>map.removeLayer(l));
   govNameMarkers.forEach(m=>map.removeLayer(m));
   govLayers=[];govNameMarkers=[];
   GOV_DATA.forEach(gov=>{
-    // Invisible polygon for click detection
+    // Polygon — for click + fill color in gov mode
     const poly=L.polygon(gov.poly,{fillOpacity:0,weight:0,opacity:0,interactive:true});
-    poly.on('click',function(e){L.DomEvent.stopPropagation(e);showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);});
+    poly.on('click',function(e){
+      if(currentBg==='gov'){
+        L.DomEvent.stopPropagation(e);
+        showGovPanel(gov,e.originalEvent.clientX,e.originalEvent.clientY);
+      }
+    });
     poly.addTo(map);govLayers.push(poly);
 
-    // Clickable label marker near governorate name on image
-    const icon=L.divIcon({
-      className:'',
-      html:`<div style="background:rgba(0,0,0,0.0);width:90px;height:30px;cursor:pointer;"></div>`,
-      iconAnchor:[45,15]
-    });
-    const m=L.marker(gov.label,{icon,interactive:true,zIndexOffset:500});
+    // Count bubble marker — styled after data loads
+    const icon=L.divIcon({className:'gov-count-icon',html:'',iconAnchor:[40,20]});
+    const m=L.marker(gov.label,{icon,interactive:true,zIndexOffset:600});
     m.on('click',function(e){
       L.DomEvent.stopPropagation(e);
       const rect=document.getElementById('map-wrap').getBoundingClientRect();
       const pt=map.latLngToContainerPoint(gov.label);
       showGovPanel(gov,rect.left+pt.x,rect.top+pt.y);
     });
-    m.addTo(map);govNameMarkers.push(m);
+    // Not added to map yet — added in setBg gov mode
+    govNameMarkers.push({marker:m,gov});
   });
 }
 buildGovLayers();
+
+// Update count bubble content after data loads
+function updateGovBubbles(){
+  govNameMarkers.forEach(({marker,gov})=>{
+    const stats={bec:0,muzaini:0,mulla:0,ansari:0};
+    ALL_DATA.forEach(b=>{
+      const gk=(b.gov||'').toLowerCase();
+      let m=false;
+      if(gov.key==='asima')m=gk.includes('asima');
+      else if(gov.key==='hawally')m=gk.includes('hawally')||gk.includes('hawalli');
+      else if(gov.key==='mubarak')m=gk.includes('mubarak');
+      else if(gov.key==='ahmadi')m=gk.includes('ahmadi');
+      else if(gov.key==='jahra')m=gk.includes('jahra');
+      else if(gov.key==='farwaniya')m=gk.includes('farwaniya');
+      if(m&&stats[b.co]!==undefined)stats[b.co]++;
+    });
+    const usT=stats.bec+stats.ansari;
+    const compT=stats.muzaini+stats.mulla;
+    const total=usT+compT;
+    const bg=usT>compT?'#15803d':usT<compT?'#b91c1c':'#b45309';
+    const html=`<div style="background:${bg};border:1.5px solid rgba(255,255,255,.6);border-radius:10px;padding:5px 10px;min-width:80px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);">
+      <div style="font-size:15px;font-weight:700;color:#fff;line-height:1.1;">${total}</div>
+      <div style="font-size:9px;color:rgba(255,255,255,.85);margin-top:1px;">us:${usT} | comp:${compT}</div>
+    </div>`;
+    marker.setIcon(L.divIcon({className:'gov-count-icon',html,iconAnchor:[40,20]}));
+  });
+}
 
 // ── GOV PANEL — full list of branches & kiosks ────────────────
 function showGovPanel(gov,cx,cy){
@@ -548,6 +575,7 @@ async function loadData(manual=false){
     });
     document.getElementById('loading').style.display='none';
     document.getElementById('lu').textContent='↻ '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    updateGovBubbles();
     render();
     if(manual){const b=document.querySelector('.hdr-btn');b.textContent='✓ Done!';b.style.background='#065f46';b.style.borderColor='#16a34a';setTimeout(()=>{b.textContent='↻ Refresh';b.style.background='';b.style.borderColor='';},2000);}
   }catch(e){
@@ -684,7 +712,7 @@ function render(){
     }
   }
 
-  // Draw icons — only in map view
+  // In gov mode — no pins shown, count bubbles handled by Leaflet markers
   if(currentBg==='map'){
     const iconSize=zoom>11?3.5:zoom>9?2.5:1.8;
     for(const b of branches){
@@ -693,57 +721,6 @@ function render(){
       if(b.type==='kiosk') drawKioskIcon(heatCtx,x,y,col,iconSize);
       else drawBranchIcon(heatCtx,x,y,col,iconSize);
     }
-  }
-
-  // In gov mode — draw count bubbles at each governorate label position
-  if(currentBg==='gov'){
-    GOV_DATA.forEach(gov=>{
-      // Count per company for this governorate
-      const stats={bec:0,muzaini:0,mulla:0,ansari:0};
-      ALL_DATA.forEach(b=>{
-        const gk=(b.gov||'').toLowerCase();
-        let m=false;
-        if(gov.key==='asima')m=gk.includes('asima');
-        else if(gov.key==='hawally')m=gk.includes('hawally')||gk.includes('hawalli');
-        else if(gov.key==='mubarak')m=gk.includes('mubarak');
-        else if(gov.key==='ahmadi')m=gk.includes('ahmadi');
-        else if(gov.key==='jahra')m=gk.includes('jahra');
-        else if(gov.key==='farwaniya')m=gk.includes('farwaniya');
-        if(m&&stats[b.co]!==undefined)stats[b.co]++;
-      });
-      const usT=stats.bec+stats.ansari;
-      const compT=stats.muzaini+stats.mulla;
-      const total=usT+compT;
-      if(total===0)return;
-
-      const{x,y}=toXY(gov.label[0],gov.label[1]);
-      // Offset bubble above the label
-      const bx=x, by=y-28;
-      const bgColor=usT>compT?'rgba(21,128,61,.9)':usT<compT?'rgba(185,28,28,.9)':'rgba(180,120,0,.9)';
-
-      // Main bubble
-      heatCtx.save();
-      heatCtx.beginPath();
-      heatCtx.roundRect(bx-38,by-16,76,32,8);
-      heatCtx.fillStyle=bgColor;
-      heatCtx.fill();
-      heatCtx.strokeStyle='rgba(255,255,255,.5)';
-      heatCtx.lineWidth=1;
-      heatCtx.stroke();
-
-      // Total number
-      heatCtx.fillStyle='#fff';
-      heatCtx.font='bold 13px "Segoe UI",sans-serif';
-      heatCtx.textAlign='center';
-      heatCtx.textBaseline='middle';
-      heatCtx.fillText(total,bx,by-3);
-
-      // Us vs comp sub-text
-      heatCtx.font='9px "Segoe UI",sans-serif';
-      heatCtx.fillStyle='rgba(255,255,255,.85)';
-      heatCtx.fillText(`us:${usT} | comp:${compT}`,bx,by+9);
-      heatCtx.restore();
-    });
   }
 
   // Summary
