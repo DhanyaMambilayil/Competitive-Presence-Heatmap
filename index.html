@@ -266,16 +266,16 @@ function setBg(mode){
     govCanvas.style.display='none';
     govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
     govNameMarkers.forEach(({marker})=>map.removeLayer(marker));
+    document.getElementById('legend').style.display='block';
   } else {
     voyagerTile.addTo(map);
     labelsTile.addTo(map);
     document.getElementById('map').style.background='';
     govCanvas.style.display='none';
-    govLayers.forEach((l,i)=>{
-      const gov=GOV_DATA[i];
-      l.setStyle({color:gov.stroke,weight:2.5,opacity:.9,fillColor:gov.fill,fillOpacity:.18,dashArray:null});
-    });
+    // No boundaries — plain map
+    govLayers.forEach(l=>l.setStyle({fillOpacity:0,weight:0,opacity:0}));
     govNameMarkers.forEach(({marker})=>marker.addTo(map));
+    document.getElementById('legend').style.display='none';
   }
   render();
 }
@@ -430,12 +430,16 @@ function updateGovBubbles(){
     const usT=stats.bec+stats.ansari;
     const compT=stats.muzaini+stats.mulla;
     const total=usT+compT;
-    const bg=usT>compT?'#15803d':usT<compT?'#b91c1c':'#b45309';
-    const html=`<div style="background:${bg};border:1.5px solid rgba(255,255,255,.6);border-radius:10px;padding:5px 10px;min-width:80px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);">
-      <div style="font-size:15px;font-weight:700;color:#fff;line-height:1.1;">${total}</div>
-      <div style="font-size:9px;color:rgba(255,255,255,.85);margin-top:1px;">us:${usT} | comp:${compT}</div>
+    // Simple neutral pin — dark background, no color coding
+    const pinHtml=`<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;">
+      <div style="background:rgba(15,17,23,.92);border:1.5px solid #4b5563;border-radius:8px;padding:5px 11px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.5);white-space:nowrap;">
+        <div style="font-size:12px;font-weight:700;color:#e8eaf0;">${gov.name}</div>
+        <div style="font-size:10px;color:#9ca3af;margin-top:1px;">${total} locations</div>
+      </div>
+      <div style="width:2px;height:8px;background:#4b5563;"></div>
+      <div style="width:7px;height:7px;border-radius:50%;background:#4b5563;"></div>
     </div>`;
-    marker.setIcon(L.divIcon({className:'gov-count-icon',html,iconAnchor:[40,20]}));
+    marker.setIcon(L.divIcon({className:'gov-count-icon',html:pinHtml,iconAnchor:[40,0]}));
   });
 }
 
@@ -666,6 +670,16 @@ function drawPin(ctx,x,y,color,iconType,size){
 function drawBranchIcon(ctx,x,y,color,size){drawPin(ctx,x,y,color,'branch',size);}
 function drawKioskIcon(ctx,x,y,color,size){drawPin(ctx,x,y,color,'kiosk',size);}
 
+function render_summary(){
+  const branches=getActive();
+  const c={bec:{br:0,ki:0},muzaini:{br:0,ki:0},mulla:{br:0,ki:0},ansari:{br:0,ki:0}};
+  for(const b of branches)if(c[b.co])c[b.co][b.type==='kiosk'?'ki':'br']++;
+  document.getElementById('s-total').textContent=branches.length;
+  document.getElementById('s-rows').innerHTML=Object.entries(c).filter(([,v])=>v.br+v.ki>0).map(([co,v])=>
+    `<div class="sr"><span class="sl"><span style="color:${COLORS[co]}">▲</span> ${LABELS[co]}</span><span class="sv">${v.br}${v.ki?`<span style="color:#6b7280;font-size:9px"> +${v.ki}ki</span>`:''}</span></div>`).join('');
+  ['bec','muzaini','mulla','ansari'].forEach(co=>{document.getElementById('cnt-'+co).textContent=`${c[co].br+c[co].ki}`;});
+}
+
 // ── RENDER ────────────────────────────────────────────────────
 function render(){
   const W=heatCanvas.width,H=heatCanvas.height;
@@ -675,6 +689,9 @@ function render(){
   const zoom=map.getZoom();
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const showHeat=document.getElementById('cb-heat').checked;
+
+  // Competitive and heatmap only in map view
+  if(currentBg==='gov') return render_summary();
 
   // Competitive heatmap
   if(document.getElementById('cb-comp')&&document.getElementById('cb-comp').checked&&ALL_DATA.length){
