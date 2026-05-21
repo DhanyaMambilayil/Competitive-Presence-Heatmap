@@ -163,16 +163,21 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
     <div class="lr"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#16a34a;vertical-align:middle;margin-right:2px"></span> Al Mulla</div>
     <div class="lr"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1e3a8a;vertical-align:middle;margin-right:2px"></span> Al Ansari</div>
     <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
-    <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
       <div class="lr">📍 Pin = Branch</div>
       <div class="lr">⬛ Square = Kiosk</div>
     </div>
-    <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;font-size:10px;color:#6b7280;">
-      <div style="margin-bottom:3px;font-weight:600;color:#9ca3af;">Competitive view</div>
-      <div class="lr"><span style="width:12px;height:12px;background:rgba(34,197,94,.6);display:inline-block;border-radius:2px;flex-shrink:0"></span> We're stronger</div>
-      <div class="lr"><span style="width:12px;height:12px;background:rgba(251,146,60,.6);display:inline-block;border-radius:2px;flex-shrink:0"></span> Competitors stronger</div>
-      <div class="lr"><span style="width:12px;height:12px;background:rgba(239,68,68,.6);display:inline-block;border-radius:2px;flex-shrink:0"></span> Not present</div>
+    <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
+      <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:4px;">Heatmap density</div>
+      <div style="display:flex;align-items:center;gap:5px;">
+        <div style="width:70px;height:6px;border-radius:3px;background:linear-gradient(to right,#00a03c,#b4c800,#dc8000,#dc1c1c)"></div>
+        <span style="font-size:9px;color:#6b7280">low → high</span>
+      </div>
     </div>
+    <div style="margin-top:6px;border-top:.5px solid #1e2130;padding-top:6px;">
+      <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:4px;">Competitive view</div>
+      <div class="lr"><span style="width:11px;height:11px;background:#15803d;display:inline-block;border-radius:50%;flex-shrink:0"></span> We're stronger</div>
+      <div class="lr"><span style="width:11px;height:11px;background:#c2410c;display:inline-block;border-radius:50%;flex-shrink:0"></span> Competitors stronger</div>
+      <div class="lr"><span style="width:11px;height:11px;background:#b91c1c;display:inline-block;border-radius:50%;flex-shrink:0"></span> Not present</div>
     </div>
   </div>
 
@@ -185,117 +190,48 @@ const COLORS={bec:'#3b9edd',muzaini:'#dc2626',mulla:'#16a34a',ansari:'#1e3a8a'};
 const LABELS={bec:'BEC',muzaini:'Al Muzaini',mulla:'Al Mulla',ansari:'Al Ansari'};
 const CO_MAP={'BEC':'bec','Al Muzaini':'muzaini','Al Mulla':'mulla','Al Ansari':'ansari'};
 
-// ── GOV BOUNDARIES — sharp, traced from reference image ───────
+// ── ACCURATE GOV BOUNDARIES matching reference image ──────────
+// Pastel colors matching reference
 const GOV_DATA=[
   {name:'Al Asimah',key:'asima',
-   fill:'#a8d8e8',stroke:'#4a9ab5',
-   label:[29.392,47.970],
-   poly:[
-     [29.420,47.940],[29.438,47.962],[29.445,47.995],
-     [29.435,48.025],[29.415,48.042],[29.390,48.048],
-     [29.368,48.035],[29.352,48.010],[29.348,47.982],
-     [29.358,47.952],[29.378,47.932],[29.402,47.928]
-   ]},
+   fill:'#f0d080',stroke:'#c9a030', // pastel yellow
+   label:[29.395,47.942],
+   poly:[[29.455,47.820],[29.472,47.870],[29.470,47.960],[29.452,48.005],
+         [29.425,48.030],[29.395,48.048],[29.368,48.048],[29.352,48.018],
+         [29.338,47.988],[29.330,47.958],[29.342,47.918],[29.362,47.878],
+         [29.392,47.848],[29.425,47.828]]},
   {name:'Hawalli',key:'hawally',
-   fill:'#c8e8f0',stroke:'#5ab0c8',
-   label:[29.330,48.105],
-   // Pink — RIGHT of Asimah, thin coastal shape
-   poly:[
-     [29.390,48.048],[29.415,48.042],[29.412,48.078],
-     [29.400,48.122],[29.375,48.158],[29.348,48.160],
-     [29.318,48.145],[29.292,48.115],[29.278,48.080],
-     [29.285,48.050],[29.318,48.038],[29.348,48.020],
-     [29.368,48.035]
-   ]},
+   fill:'#f0a0b8',stroke:'#c0507a', // pastel pink
+   label:[29.318,48.085],
+   poly:[[29.368,48.048],[29.395,48.048],[29.408,48.080],[29.398,48.135],
+         [29.372,48.162],[29.342,48.162],[29.310,48.142],[29.288,48.112],
+         [29.278,48.080],[29.288,48.050],[29.320,48.040],[29.352,48.018]]},
   {name:'Mubarak Al Kabeer',key:'mubarak',
-   fill:'#7ab8d0',stroke:'#2a7898',
-   label:[29.242,48.058],
-   // Purple rectangle below Asimah+Hawalli
-   poly:[
-     [29.285,48.050],[29.278,48.080],[29.292,48.115],
-     [29.318,48.145],[29.295,48.160],[29.262,48.160],
-     [29.228,48.140],[29.198,48.110],[29.178,48.070],
-     [29.195,48.032],[29.222,48.015],[29.258,48.018]
-   ]},
-  {name:'Al Farwaniyah',key:'farwaniya',
-   fill:'#90c8d8',stroke:'#3888a8',
-   label:[29.282,47.950],
-   // Blue — inland square between Jahra and coastal govs
-   poly:[
-     [29.348,47.982],[29.358,47.952],[29.378,47.932],
-     [29.402,47.928],[29.420,47.940],[29.415,48.042],
-     [29.390,48.048],[29.368,48.035],[29.348,48.020],
-     [29.318,48.038],[29.285,48.050],[29.258,48.018],
-     [29.222,48.015],[29.195,48.032],[29.195,47.950],
-     [29.222,47.935],[29.258,47.928],[29.295,47.932],
-     [29.325,47.940]
-   ]},
+   fill:'#b0a0d8',stroke:'#6040a0', // pastel purple
+   label:[29.240,48.048],
+   poly:[[29.288,48.050],[29.278,48.080],[29.288,48.112],[29.310,48.142],
+         [29.288,48.162],[29.258,48.162],[29.228,48.140],[29.198,48.110],
+         [29.178,48.068],[29.198,48.030],[29.228,48.010],[29.260,48.010]]},
   {name:'Al Ahmadi',key:'ahmadi',
-   fill:'#b8e0e8',stroke:'#4898b0',
-   label:[29.068,48.085],
-   // Large orange — starts immediately below Mubarak, goes to Saudi border
-   poly:[
-     [29.195,47.872],[29.195,47.950],[29.195,48.032],
-     [29.178,48.070],[29.198,48.110],[29.228,48.140],
-     [29.198,48.160],[29.148,48.202],[29.078,48.202],
-     [28.988,48.360],[28.952,48.420],[28.922,48.342],
-     [28.912,48.192],[28.928,47.980],[28.950,47.872]
-   ]},
+   fill:'#f0a870',stroke:'#c06020', // pastel orange
+   label:[29.060,48.080],
+   poly:[[29.198,47.870],[29.198,48.030],[29.178,48.068],[29.198,48.110],
+         [29.228,48.140],[29.198,48.162],[29.148,48.200],[29.078,48.200],
+         [28.985,48.355],[28.952,48.402],[28.928,48.340],[28.918,48.190],
+         [28.930,47.980],[28.950,47.870]]},
   {name:'Al Jahra',key:'jahra',
-   fill:'#d8f0f4',stroke:'#6ab8cc',
-   label:[29.375,47.525],
-   // Large green — all of north/west Kuwait, flat bottom edge
-   poly:[
-     [29.558,47.375],[29.592,47.425],[29.602,47.580],
-     [29.600,47.730],[29.578,47.880],[29.455,47.878],
-     [29.420,47.878],[29.402,47.928],[29.378,47.932],
-     [29.358,47.952],[29.348,47.982],[29.325,47.940],
-     [29.295,47.932],[29.258,47.928],[29.222,47.935],
-     [29.195,47.950],[29.195,47.872],[28.950,47.872],
-     [28.950,47.375]
-   ]}
+   fill:'#90c890',stroke:'#307830', // pastel green
+   label:[29.390,47.560],
+   poly:[[29.555,47.375],[29.582,47.500],[29.582,47.800],[29.558,47.872],
+         [29.458,47.872],[29.420,47.872],[29.342,47.872],[29.198,47.872],
+         [28.950,47.872],[28.950,47.375]]},
+  {name:'Farwaniya',key:'farwaniya',
+   fill:'#a0b8e8',stroke:'#3060b0', // pastel blue
+   label:[29.272,47.935],
+   poly:[[29.342,47.872],[29.362,47.878],[29.342,47.918],[29.330,47.958],
+         [29.288,47.978],[29.258,47.978],[29.228,47.968],[29.198,47.948],
+         [29.198,47.872]]}
 ];
-
-// ── COMPETITIVE HEATMAP LOGIC ─────────────────────────────────
-// "We" = BEC + Al Ansari  |  "Competitors" = Al Muzaini + Al Mulla
-// Green  = we present AND stronger than competitors
-// Orange = we present BUT competitors stronger
-// Red    = we NOT present, competitors present
-function drawCompetitiveHeat(ctx,W,H,zoom){
-  const baseR=Math.max(22,Math.min(100,zoom*10-40));
-  const grid=40; // grid cell size in px
-  const cols=Math.ceil(W/grid)+1, rows=Math.ceil(H/grid)+1;
-
-  for(let row=0;row<rows;row++){
-    for(let col=0;col<cols;col++){
-      const px=col*grid, py=row*grid;
-      // convert pixel to latlng
-      const ll=map.containerPointToLatLng([px,py]);
-      const lat=ll.lat, lng=ll.lng;
-
-      let weCount=0, compCount=0;
-      for(const b of ALL_DATA){
-        const dx=b.lng-lng, dy=b.lat-lat;
-        const dist=Math.sqrt(dx*dx+dy*dy)*111; // approx km
-        const influence=Math.max(0,1-dist/(baseR*0.009));
-        if(influence<=0)continue;
-        if(b.co==='bec'||b.co==='ansari') weCount+=influence;
-        else compCount+=influence;
-      }
-
-      if(weCount===0&&compCount===0)continue;
-
-      let color;
-      if(weCount>0&&weCount>=compCount) color='rgba(34,197,94,'; // green
-      else if(weCount>0&&weCount<compCount) color='rgba(251,146,60,'; // orange
-      else color='rgba(239,68,68,'; // red — competitors only
-
-      const alpha=Math.min(0.55,Math.max(0.08,(weCount+compCount)*0.12));
-      ctx.fillStyle=color+alpha+')';
-      ctx.fillRect(px-grid/2,py-grid/2,grid,grid);
-    }
-  }
-}
 
 // ── MAP ───────────────────────────────────────────────────────
 const map=L.map('map',{center:[29.15,47.98],zoom:9,zoomControl:false});
@@ -345,10 +281,21 @@ function setBg(mode){
 
 function llToXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return[p.x,p.y];}
 
-function drawSharpPoly(ctx,pts){
+function drawSmoothPoly(ctx,pts){
   if(pts.length<3)return;
   ctx.moveTo(pts[0][0],pts[0][1]);
-  for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+  for(let i=0;i<pts.length;i++){
+    const p0=pts[(i-1+pts.length)%pts.length];
+    const p1=pts[i];
+    const p2=pts[(i+1)%pts.length];
+    const p3=pts[(i+2)%pts.length];
+    const t=0.35;
+    const cp1x=p1[0]+(p2[0]-p0[0])*t/2;
+    const cp1y=p1[1]+(p2[1]-p0[1])*t/2;
+    const cp2x=p2[0]-(p3[0]-p1[0])*t/2;
+    const cp2y=p2[1]-(p3[1]-p1[1])*t/2;
+    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2[0],p2[1]);
+  }
   ctx.closePath();
 }
 
@@ -398,7 +345,7 @@ function drawGov(){
   GOV_DATA.forEach(gov=>{
     const pts=gov.poly.map(([lat,lng])=>llToXY(lat,lng));
     govCtx.beginPath();
-    drawSharpPoly(govCtx,pts);
+    drawSmoothPoly(govCtx,pts);
     govCtx.fillStyle=gov.fill+'ee';
     govCtx.fill();
     govCtx.strokeStyle=gov.stroke+'99';
@@ -552,58 +499,75 @@ function getActive(){
 function toXY(lat,lng){const p=map.latLngToContainerPoint([lat,lng]);return{x:p.x,y:p.y};}
 function hex2rgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
 
-// ── DRAW ICONS ────────────────────────────────────────────────
-// Branch = map pin with building icon inside
-function drawBranchIcon(ctx,x,y,color,size){
-  const s=size*2.8;
-  ctx.save();ctx.translate(x,y);
-  const r=s;
-  // Pin shape
+// ── DRAW ICONS — map pin style ────────────────────────────────
+function drawPin(ctx,x,y,color,iconType,size){
+  const s=size*2.8; // pin overall size
+  ctx.save();
+  ctx.translate(x,y);
+
+  // ── Pin shape (circle top + pointed bottom) ──
   ctx.beginPath();
+  const r=s;
+  // circle
   ctx.arc(0,-r*.45,r*.72,Math.PI*.18,-Math.PI*1.18,true);
+  // point at bottom
   ctx.lineTo(0,r*.85);
   ctx.closePath();
-  ctx.fillStyle=color;ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.2;ctx.stroke();
-  // Building icon inside
-  const ic=r*.38;
+  ctx.fillStyle=color;
+  ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.85)';
+  ctx.lineWidth=1.2;
+  ctx.stroke();
+
+  // ── White icon inside ──
+  const ic=r*.38; // icon scale
   ctx.fillStyle='rgba(255,255,255,.95)';
-  const bx=-ic*.9,by=-ic*1.55,bw=ic*1.8,bh=ic*1.4;
-  ctx.fillRect(bx,by,bw,bh);
-  ctx.beginPath();ctx.moveTo(bx-ic*.15,by);ctx.lineTo(0,-ic*2.05);ctx.lineTo(bx+bw+ic*.15,by);
-  ctx.closePath();ctx.fill();
-  ctx.fillStyle=color;ctx.fillRect(-ic*.22,by+bh-ic*.65,ic*.45,ic*.65);
-  ctx.fillStyle='rgba(255,255,255,.95)';
-  [-ic*.5,0,ic*.5].forEach(cx=>ctx.fillRect(cx-ic*.08,by+ic*.05,ic*.16,ic*.7));
+
+  if(iconType==='branch'){
+    // Building / bank icon
+    const bx=-ic*.9, by=-ic*1.55, bw=ic*1.8, bh=ic*1.4;
+    // Base building rect
+    ctx.fillRect(bx,by,bw,bh);
+    // Roof / pediment triangle
+    ctx.beginPath();
+    ctx.moveTo(bx-ic*.15,by);
+    ctx.lineTo(0,-ic*2.05);
+    ctx.lineTo(bx+bw+ic*.15,by);
+    ctx.closePath();ctx.fill();
+    // Door
+    ctx.fillStyle=color;
+    const dw=ic*.45,dh=ic*.65;
+    ctx.fillRect(-dw/2,by+bh-dh,dw,dh);
+    // Columns
+    ctx.fillStyle='rgba(255,255,255,.95)';
+    [-ic*.5,0,ic*.5].forEach(cx=>{
+      ctx.fillRect(cx-ic*.08,by+ic*.05,ic*.16,ic*.7);
+    });
+  } else {
+    // Kiosk / ATM counter icon
+    // Main body
+    ctx.fillRect(-ic*.75,-ic*1.6,ic*1.5,ic*1.5);
+    // Screen
+    ctx.fillStyle=color;
+    ctx.fillRect(-ic*.5,-ic*1.45,ic,ic*.7);
+    // Keypad dots
+    ctx.fillStyle='rgba(255,255,255,.95)';
+    for(let row=0;row<2;row++)for(let col=0;col<3;col++){
+      ctx.beginPath();
+      ctx.arc(-ic*.4+col*ic*.4,-ic*.55+row*ic*.22,ic*.07,0,Math.PI*2);
+      ctx.fill();
+    }
+    // Stand/base
+    ctx.fillRect(-ic*.3,-ic*.1,ic*.6,ic*.15);
+    ctx.fillRect(-ic*.55,-ic*.05,ic*1.1,ic*.12);
+  }
+
   ctx.restore();
 }
 
-// Kiosk = standalone icon (no pin) — square with screen + keypad
-function drawKioskIcon(ctx,x,y,color,size){
-  const s=size*2.4;
-  ctx.save();ctx.translate(x,y-s*.3);
-  // Outer rounded square background
-  const hw=s*.85,hh=s*.85;
-  ctx.beginPath();
-  ctx.roundRect(-hw,-hh,hw*2,hh*2,s*.2);
-  ctx.fillStyle=color;ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.2;ctx.stroke();
-  // Screen (white rect)
-  const sw=s*.9,sh=s*.55;
-  ctx.fillStyle='rgba(255,255,255,.95)';
-  ctx.fillRect(-sw/2,-hh*.7,sw,sh);
-  // Screen inner (color)
-  ctx.fillStyle=color;
-  ctx.fillRect(-sw/2+s*.08,-hh*.7+s*.06,sw-s*.16,sh-s*.1);
-  // Keypad dots (3x2 grid)
-  ctx.fillStyle='rgba(255,255,255,.9)';
-  for(let row=0;row<2;row++)for(let col=0;col<3;col++){
-    ctx.beginPath();
-    ctx.arc(-s*.28+col*s*.28,s*.05+row*s*.22,s*.07,0,Math.PI*2);
-    ctx.fill();
-  }
-  ctx.restore();
-}
+// Legacy wrappers kept for compatibility
+function drawBranchIcon(ctx,x,y,color,size){drawPin(ctx,x,y,color,'branch',size);}
+function drawKioskIcon(ctx,x,y,color,size){drawPin(ctx,x,y,color,'kiosk',size);}
 
 // ── RENDER ────────────────────────────────────────────────────
 function render(){
@@ -615,28 +579,57 @@ function render(){
   const baseR=Math.max(18,Math.min(90,zoom*9-42));
   const showHeat=document.getElementById('cb-heat').checked;
 
-  // Competitive heatmap
-  if(document.getElementById('cb-comp').checked && ALL_DATA.length){
-    drawCompetitiveHeat(heatCtx,W,H,zoom);
+  // Competitive heatmap — circles, darker colors
+  if(document.getElementById('cb-comp')&&document.getElementById('cb-comp').checked&&ALL_DATA.length){
+    const compR=Math.max(25,Math.min(85,zoom*9-40));
+    // Pre-compute screen positions once
+    const pts=ALL_DATA.map(b=>{const{x,y}=toXY(b.lat,b.lng);return{x,y,we:b.co==='bec'||b.co==='ansari',r:b.type==='kiosk'?compR*.6:compR};});
+    for(const p of pts){
+      let we=0,comp=0;
+      for(const q of pts){
+        const d=Math.sqrt((p.x-q.x)**2+(p.y-q.y)**2);
+        if(d<compR*1.5){const inf=1-d/(compR*1.5);if(q.we)we+=inf;else comp+=inf;}
+      }
+      if(we===0&&comp===0)continue;
+      let R,G,B;
+      if(we>0&&we>=comp){R=21;G=128;B=61;}       // dark green
+      else if(we>0){R=194;G=65;B=12;}             // dark orange
+      else{R=185;G=28;B=28;}                       // dark red
+      const g=heatCtx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+      g.addColorStop(0,`rgba(${R},${G},${B},0.75)`);
+      g.addColorStop(0.5,`rgba(${R},${G},${B},0.4)`);
+      g.addColorStop(1,`rgba(${R},${G},${B},0)`);
+      heatCtx.beginPath();heatCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      heatCtx.fillStyle=g;heatCtx.fill();
+    }
   }
 
-  // Standard heatmap blobs
+  // Heatmap — red (dense) to green (sparse) gradient
   if(showHeat){
     const groups={bec:[],muzaini:[],mulla:[],ansari:[]};
     for(const b of branches)if(groups[b.co])groups[b.co].push(b);
-    for(const[co,pts]of Object.entries(groups)){
-      if(!pts.length)continue;
-      const[R,G,B]=hex2rgb(COLORS[co]);
-      for(const b of pts){
-        const{x,y}=toXY(b.lat,b.lng);
-        const r=b.type==='kiosk'?baseR*.6:baseR;
-        const g=heatCtx.createRadialGradient(x,y,0,x,y,r);
-        const a=b.type==='kiosk'?.18:.26;
-        g.addColorStop(0,`rgba(${R},${G},${B},${a})`);
-        g.addColorStop(.5,`rgba(${R},${G},${B},${a*.3})`);
-        g.addColorStop(1,`rgba(${R},${G},${B},0)`);
-        heatCtx.beginPath();heatCtx.arc(x,y,r,0,Math.PI*2);heatCtx.fillStyle=g;heatCtx.fill();
-      }
+    const all=Object.values(groups).flat();
+    // First pass: count density per point
+    const density=all.map(b=>{
+      const{x,y}=toXY(b.lat,b.lng);
+      let v=0;
+      for(const b2 of all){const{x:x2,y:y2}=toXY(b2.lat,b2.lng);const d=Math.sqrt((x-x2)**2+(y-y2)**2);if(d<baseR)v+=Math.pow(1-d/baseR,2);}
+      return{x,y,v,r:b.type==='kiosk'?baseR*.6:baseR};
+    });
+    const maxV=Math.max(...density.map(d=>d.v),1);
+    for(const d of density){
+      const n=Math.min(d.v/maxV,1);
+      // red=1 (dense), yellow=0.5, green=0 (sparse)
+      let R,G,B;
+      if(n>0.6){const t=(n-0.6)/0.4;R=Math.round(220);G=Math.round(180*(1-t));B=0;}
+      else if(n>0.3){const t=(n-0.3)/0.3;R=Math.round(180*t);G=200;B=0;}
+      else{R=0;G=Math.round(160+n/0.3*60);B=60;}
+      const alpha=0.15+n*0.35;
+      const g=heatCtx.createRadialGradient(d.x,d.y,0,d.x,d.y,d.r);
+      g.addColorStop(0,`rgba(${R},${G},${B},${alpha})`);
+      g.addColorStop(0.5,`rgba(${R},${G},${B},${alpha*0.4})`);
+      g.addColorStop(1,`rgba(${R},${G},${B},0)`);
+      heatCtx.beginPath();heatCtx.arc(d.x,d.y,d.r,0,Math.PI*2);heatCtx.fillStyle=g;heatCtx.fill();
     }
   }
 
