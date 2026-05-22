@@ -31,7 +31,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{width:100%;height:100%;}
 #gov-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:200;}
-#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;}
+#heat-canvas{position:absolute;top:0;left:0;pointer-events:all;z-index:400;cursor:default;touch-action:none;}
 
 /* Zoom */
 #zoom-btns{position:absolute;bottom:40px;left:10px;z-index:1000;display:flex;flex-direction:column;gap:4px;}
@@ -82,7 +82,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
 
 /* Legend */
 #legend{position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;backdrop-filter:blur(6px);}
-#legend .lt{font-weight:600;color:#e8eaf0;margin-bottom:7px;font-size:12px;}
+#legend .lt{font-weight:600;color:#e8eaf0;margin-bottom:7px;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.legend-toggle{background:none;border:none;color:#6b7280;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;}
+.legend-toggle:hover{color:#e8eaf0;}
+#legend.collapsed .legend-body{display:none;}
+#legend.collapsed{padding-bottom:10px;}
+#gov-legend.collapsed .legend-body{display:none;}
 .lr{display:flex;align-items:center;gap:7px;margin-bottom:4px;font-size:11px;color:#9ca3af;}
 
 /* Popup */
@@ -158,7 +163,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
   </div>
 
   <div id="legend">
-    <div class="lt">Legend</div>
+    <div class="lt">Legend <button class="legend-toggle" onclick="toggleLegend('legend')" id="legend-btn">▲</button></div>
+    <div class="legend-body">
     <div style="margin-bottom:7px;padding-bottom:7px;border-bottom:.5px solid #1e2130;">
       <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Icon types</div>
       <div class="lr"><svg width="14" height="18" viewBox="0 0 14 18"><path d="M7 0C4.24 0 2 2.24 2 5c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5z" fill="#3b9edd"/><rect x="4.5" y="2.5" width="5" height="4" fill="white" rx="0.3"/><polygon points="3.8,2.5 7,0.5 10.2,2.5" fill="white"/><rect x="5.8" y="3.2" width="0.8" height="2.5" fill="#3b9edd"/><rect x="7.4" y="3.2" width="0.8" height="2.5" fill="#3b9edd"/></svg> Branch (pin)</div>
@@ -177,12 +183,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
       <div class="lr"><span style="width:11px;height:11px;background:#ea6424;display:inline-block;border-radius:50%;flex-shrink:0"></span> Competitors stronger</div>
       <div class="lr"><span style="width:11px;height:11px;background:#ef4444;display:inline-block;border-radius:50%;flex-shrink:0"></span> Not present</div>
     </div>
+    </div>
   </div>
 
   <!-- Governorate view legend -->
   <div id="gov-legend" style="display:none;position:absolute;bottom:30px;right:10px;z-index:1000;background:rgba(8,10,18,.93);border:1px solid #2a2d3e;border-radius:9px;padding:10px 13px;font-size:11px;backdrop-filter:blur(6px);">
-    <div style="font-weight:600;color:#e8eaf0;margin-bottom:7px;font-size:12px;">Governorate View</div>
-    <div style="font-size:10px;color:#6b7280;margin-bottom:8px;font-style:italic;">Hover over a dot to see details</div>
+    <div style="font-weight:600;color:#e8eaf0;margin-bottom:0;font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">Governorate View <button class="legend-toggle" onclick="toggleLegend('gov-legend')" id="gov-legend-btn">▲</button></div>
+    <div class="legend-body">
+    <div style="font-size:10px;color:#6b7280;margin-top:6px;margin-bottom:8px;font-style:italic;">Hover over a dot to see details</div>
     <div style="font-size:10px;font-weight:600;color:#9ca3af;margin-bottom:5px;">Dot color</div>
     <div class="lr"><span style="width:11px;height:11px;background:#3b9edd;display:inline-block;border-radius:50%;flex-shrink:0"></span> We lead (BEC + Ansari)</div>
     <div class="lr"><span style="width:11px;height:11px;background:#dc2626;display:inline-block;border-radius:50%;flex-shrink:0"></span> Competitors lead (Muzaini + Mulla)</div>
@@ -199,6 +207,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
       <div class="lr"><span style="width:11px;height:11px;background:#22c55e;display:inline-block;border-radius:50%;flex-shrink:0"></span> We're stronger</div>
       <div class="lr"><span style="width:11px;height:11px;background:#ea6424;display:inline-block;border-radius:50%;flex-shrink:0"></span> Competitors stronger</div>
       <div class="lr"><span style="width:11px;height:11px;background:#ef4444;display:inline-block;border-radius:50%;flex-shrink:0"></span> Not present</div>
+    </div>
     </div>
   </div>
 
@@ -838,13 +847,25 @@ heatCanvas.addEventListener('click',e=>{
       </div>`).openOn(map);
   } else map.closePopup();
 });
-heatCanvas.addEventListener('mousedown',e=>{
-  const rect=heatCanvas.getBoundingClientRect();
-  if(!findNearest(e.clientX-rect.left,e.clientY-rect.top)){
-    const pane=document.querySelector('.leaflet-map-pane');
-    if(pane)pane.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY,button:e.button}));
-  }
+// ── FORWARD TOUCH EVENTS TO LEAFLET (mobile pinch/pan) ───────
+['touchstart','touchmove','touchend','touchcancel'].forEach(evt=>{
+  heatCanvas.addEventListener(evt,function(e){
+    // Only forward if not hovering a branch (let single taps still work for tooltips)
+    const pane=map.getPanes().mapPane;
+    if(pane) pane.dispatchEvent(new TouchEvent(evt,{
+      bubbles:true,cancelable:true,
+      touches:e.touches,targetTouches:e.targetTouches,changedTouches:e.changedTouches
+    }));
+  },{passive:true});
 });
+
+// ── LEGEND TOGGLE ─────────────────────────────────────────────
+function toggleLegend(id){
+  const el=document.getElementById(id);
+  const btn=document.getElementById(id+'-btn');
+  const collapsed=el.classList.toggle('collapsed');
+  btn.textContent=collapsed?'▼':'▲';
+}
 
 // ── BOOT ──────────────────────────────────────────────────────
 setBg('map');
