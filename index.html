@@ -847,10 +847,35 @@ heatCanvas.addEventListener('click',e=>{
       </div>`).openOn(map);
   } else map.closePopup();
 });
+// ── FORWARD MOUSE DRAG + SCROLL TO LEAFLET ───────────────────
+// Wheel/scroll — forward directly to map container
+heatCanvas.addEventListener('wheel',function(e){
+  e.preventDefault();
+  map.getContainer().dispatchEvent(new WheelEvent('wheel',{
+    bubbles:true,cancelable:true,
+    deltaX:e.deltaX,deltaY:e.deltaY,deltaZ:e.deltaZ,deltaMode:e.deltaMode,
+    clientX:e.clientX,clientY:e.clientY,ctrlKey:e.ctrlKey
+  }));
+},{passive:false});
+
+// Mouse drag — forward mousedown to Leaflet when not clicking a branch
+heatCanvas.addEventListener('mousedown',function(e){
+  const rect=heatCanvas.getBoundingClientRect();
+  const nearest=findNearest(e.clientX-rect.left,e.clientY-rect.top);
+  if(!nearest){
+    heatCanvas.style.cursor='grab';
+    const pane=map.getPanes().mapPane;
+    if(pane)pane.dispatchEvent(new MouseEvent('mousedown',{
+      bubbles:true,cancelable:true,
+      clientX:e.clientX,clientY:e.clientY,button:e.button,buttons:e.buttons
+    }));
+  }
+});
+heatCanvas.addEventListener('mouseup',()=>{heatCanvas.style.cursor='default';});
+
 // ── FORWARD TOUCH EVENTS TO LEAFLET (mobile pinch/pan) ───────
 ['touchstart','touchmove','touchend','touchcancel'].forEach(evt=>{
   heatCanvas.addEventListener(evt,function(e){
-    // Only forward if not hovering a branch (let single taps still work for tooltips)
     const pane=map.getPanes().mapPane;
     if(pane) pane.dispatchEvent(new TouchEvent(evt,{
       bubbles:true,cancelable:true,
