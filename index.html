@@ -211,7 +211,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#1a1a2e;color:#e8eaf
     </div>
   </div>
 
-  <div id="loading"><div class="spinner"></div><p id="lmsg">Loading from Google Sheet…</p></div>
+  <div id="loading"><div class="spinner"></div><p id="lmsg">Loading insights…</p></div>
 </div>
 
 <script>
@@ -610,7 +610,7 @@ function parseCSV(text){
 let ALL_DATA=[];
 async function loadData(manual=false){
   document.getElementById('loading').style.display='flex';
-  document.getElementById('lmsg').textContent=manual?'Refreshing…':'Loading from Google Sheet…';
+  document.getElementById('lmsg').textContent=manual?'Refreshing…':'Loading insights…';
   try{
     const resp=await fetch(SHEET_CSV+'&t='+Date.now());
     if(!resp.ok)throw new Error('HTTP '+resp.status);
